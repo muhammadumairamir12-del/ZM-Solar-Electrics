@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +11,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script> <!-- ADDED STORAGE SDK -->
 
 <style>
 :root {
@@ -88,10 +90,21 @@ body {
 }
 .login-grid { width: 100%; max-width: 420px; animation: bounceIn 0.6s cubic-bezier(.36,.07,.19,.97); }
 .login-logo { text-align: center; margin-bottom: 32px; }
-.login-logo .logo-icon {
+.login-logo .logo-icon { /* Original styles, not used by new img */
   width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border-radius: 18px; display: inline-flex; align-items: center; justify-content: center;
   font-size: 28px; margin-bottom: 14px; animation: pulse-glow 2s infinite; box-shadow: 0 8px 30px rgba(245,158,11,0.3);
+}
+/* New style for the logo image on login screen */
+.login-logo .logo-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  object-fit: cover; /* Ensures image covers the area without distortion */
+  margin-bottom: 14px;
+  display: inline-block; /* To allow margin-bottom and center with text-align */
+  animation: pulse-glow 2s infinite; /* Keep the pulse glow */
+  box-shadow: 0 8px 30px rgba(245,158,11,0.3);
 }
 .login-logo h1 { font-size: 1.6rem; font-weight: 800; color: var(--text); }
 .login-logo span { color: var(--primary); }
@@ -127,7 +140,17 @@ body {
 }
 .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
 .brand-badge { display: inline-flex; align-items: center; gap: 10px; }
-.brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.brand-icon { /* Original styles, not used by new img */
+  width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+/* New style for the logo image in the sidebar brand */
+.brand-image {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevents image from shrinking in flex container */
+}
 .brand-text h3 { font-size: 1rem; font-weight: 800; color: var(--text); }
 .brand-text span { font-size: 0.72rem; color: var(--text2); display: block; }
 
@@ -283,14 +306,72 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
 .modal-close-btn { width: 32px; height: 32px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #f87171; font-size: 1rem; font-weight: 700; transition: background 0.15s; flex-shrink: 0; }
 .modal-close-btn:hover { background: rgba(239,68,68,0.2); }
 
-.status-update-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
-.status-update-row label { font-size: 0.85rem; font-weight: 700; color: var(--text2); }
+.status-update-row { 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    margin-top: 18px; 
+    padding-top: 18px; 
+    border-top: 1px solid var(--border); 
+}
+.status-update-row label { display:block; margin-bottom:7px; font-size: 0.82rem; font-weight: 600; color: var(--text2); text-transform: uppercase; } /* Added label display block */
 .status-update-row select { flex: 1; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.88rem; outline: none; }
 .status-update-row select:focus { border-color: var(--primary); }
 .status-update-row .btn-save { padding: 10px 20px; background: var(--primary); color: #0f172a; border: none; border-radius: 8px; font-weight: 700; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: transform 0.15s; }
 .status-update-row .btn-save:hover { transform: translateY(-1px); }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Product Image Upload specific styles */
+.fc-image-upload {
+    margin-bottom: 18px;
+}
+.fc-image-upload .input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.fc-image-upload .input-group input[type="file"] {
+    flex: 1;
+    padding: 10px 12px;
+}
+.fc-image-upload .input-group .btn-clear-image {
+    padding: 10px 12px;
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.15s;
+}
+.fc-image-upload .input-group .btn-clear-image:hover {
+    background: rgba(239,68,68,0.2);
+}
+.fc-image-upload .image-preview-container {
+    margin-top: 15px;
+    text-align: center;
+}
+.fc-image-upload .image-preview {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 5px;
+    object-fit: contain;
+    background: white;
+}
+.fc-image-upload .upload-status {
+    color: var(--text2);
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
 
 /* =========================================
    TOAST / NOTIFICATION
@@ -372,7 +453,7 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
 <div id="login-screen">
   <div class="login-grid">
     <div class="login-logo">
-      <div class="logo-icon">☀️</div>
+      <img src="https://scontent.flhe2-4.fna.fbcdn.net/v/t39.30808-6/672002872_122117236269233257_940256756653480400_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeFA09hW7St8anyVWfZciSCvclnRcMw2OMJyWdFwzDY4whkMroevV_eZ7RCURWneXUNpu8QW3Vbdsn_g5qzhSFNg&_nc_ohc=Uir--C-bMMEQ7kNvwEatlfJ&_nc_oc=AdqLAE6iewDbix6-fW8NRGNIY-YK89RGE0F4sQ8Uok9pFTU-Qs_LjFEo8v5N3QKu7GKjZGoDiwMMR9a35OzDMa8R&_nc_zt=23&_nc_ht=scontent.flhe2-4.fna&_nc_gid=wM8AhtPsKxkbV0KivYNWrA&_nc_ss=7a3a8&oh=00_Af3WS9cHTOWSqU2x0yPWw_SH-0k71ssULS1G7vNSSKamDw&oe=69E8F137" alt="ZM Solar Logo" class="logo-image">
       <h1>ZM <span>Solar</span></h1>
       <p>Admin Control Panel</p>
     </div>
@@ -401,7 +482,7 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
   <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-badge">
-        <div class="brand-icon">☀️</div>
+        <img src="https://scontent.flhe2-4.fna.fbcdn.net/v/t39.30808-6/672002872_122117236269233257_940256756653480400_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeFA09hW7St8anyVWfZciSCvclnRcMw2OMJyWdFwzDY4whkMroevV_eZ7RCURWneXUNpu8QW3Vbdsn_g5qzhSFNg&_nc_ohc=Uir--C-bMMEQ7kNvwEatlfJ&_nc_oc=AdqLAE6iewDbix6-fW8NRGNIY-YK89RGE0F4sQ8Uok9pFTU-Qs_LjFEo8v5N3QKu7GKjZGoDiwMMR9a35OzDMa8R&_nc_zt=23&_nc_ht=scontent.flhe2-4.fna&_nc_gid=wM8AhtPsKxkbV0KivYNWrA&_nc_ss=7a3a8&oh=00_Af3WS9cHTOWSqU2x0yPWw_SH-0k71ssULS1G7vNSSKamDw&oe=69E8F137" alt="ZM Solar Logo" class="brand-image">
         <div class="brand-text">
           <h3>ZM Solar</h3>
           <span>Admin Panel</span>
@@ -416,6 +497,7 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
       <a class="nav-item" onclick="switchView('products')">
         <div class="nav-item-left"><div class="nav-icon">📦</div> Products</div>
       </a>
+      
       <div class="nav-section-label">Activity</div>
       <a class="nav-item" onclick="switchView('orders')">
         <div class="nav-item-left"><div class="nav-icon">🛒</div> Orders</div>
@@ -429,6 +511,14 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
         <div class="nav-item-left"><div class="nav-icon">💬</div> Messages</div>
         <span id="badge-messages" class="nav-badge" style="display:none;">0</span>
       </a>
+
+      <!-- SETTINGS SECTION REMOVED -->
+      <!--
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" onclick="switchView('settings')">
+        <div class="nav-item-left"><div class="nav-icon">⚙️</div> Settings</div>
+      </a>
+      -->
     </div>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="logout()">🚪 Logout</div>
@@ -596,6 +686,31 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
         </div>
       </div>
 
+      <!-- ====== SETTINGS REMOVED ====== -->
+      <!--
+      <div id="view-settings" class="view-section">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Store Settings</div>
+            <div class="page-subtitle">Configure extra charges that show up on the website</div>
+          </div>
+        </div>
+        <div class="card" style="max-width: 600px; padding: 28px;">
+          <div class="fc">
+            <label>Delivery Charges (Rs.)</label>
+            <input type="number" id="setting-delivery" placeholder="e.g. 500" value="0">
+            <small style="color:var(--text2); display:block; margin-top:5px;">This amount will be added to the customer's total bill at checkout.</small>
+          </div>
+          <div class="fc">
+            <label>Platform / Service Fee (Rs.)</label>
+            <input type="number" id="setting-platform" placeholder="e.g. 100" value="0">
+            <small style="color:var(--text2); display:block; margin-top:5px;">Extra fixed charges applied per order.</small>
+          </div>
+          <button class="btn-primary" onclick="saveSettings()" style="width: auto; padding: 14px 30px; margin-top: 10px;">💾 Save Settings</button>
+        </div>
+      </div>
+      -->
+
     </div>
   </div>
 </div>
@@ -630,10 +745,22 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
         <div class="fc"><label>Current Price (Rs.) *</label><input type="number" id="p-price" required></div>
         <div class="fc"><label>Old Price (Rs.)</label><input type="number" id="p-old-price"></div>
       </div>
-      <div class="grid-2">
-        <div class="fc"><label>Badge</label><input type="text" id="p-badge" placeholder="e.g. 20% OFF"></div>
-        <div class="fc"><label>Image URL *</label><input type="url" id="p-img" required></div>
+      <!-- NEW IMAGE UPLOAD SECTION -->
+      <div class="fc fc-image-upload">
+        <label>Product Image</label>
+        <div class="input-group">
+            <input type="file" id="p-image-upload" accept="image/*" class="fc-input">
+            <button type="button" class="btn-clear-image" id="clear-image-btn" style="display:none;" onclick="clearProductImage()">✕ Clear</button>
+        </div>
+        <small style="color:var(--text2); display:block; margin-top:-10px; margin-bottom: 10px;">Or paste an image URL below.</small>
+        <input type="url" id="p-img-url" class="fc-input" placeholder="Paste image URL here (e.g. https://example.com/image.jpg)">
+        <div class="image-preview-container" id="p-image-preview-container" style="display: none;">
+          <img id="p-image-preview" src="" alt="Product Image Preview" class="image-preview">
+        </div>
+        <small id="image-upload-status" class="upload-status"></small>
       </div>
+      <!-- END NEW IMAGE UPLOAD SECTION -->
+      <div class="fc"><label>Badge</label><input type="text" id="p-badge" placeholder="e.g. 20% OFF"></div>
       <div class="fc"><label>Short Description</label><textarea id="p-desc" rows="2"></textarea></div>
       <div class="fc"><label>Datasheet Text</label><textarea id="p-datasheet" rows="3"></textarea></div>
       <div class="fc"><label>PDF Brochure Link</label><input type="url" id="p-pdf"></div>
@@ -650,15 +777,27 @@ td img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; bac
       <button class="modal-close-btn" onclick="closeOrderModal()">✕</button>
     </div>
     <div id="order-details-content"></div>
+
+    <!-- Corrected and combined update controls for order status and delivery -->
     <div class="status-update-row">
-      <label>Status:</label>
-      <select id="o-status-update">
-        <option value="Pending">Pending</option>
-        <option value="Confirmed">Confirmed</option>
-        <option value="Completed">Completed</option>
-        <option value="Cancelled">Cancelled</option>
-      </select>
-      <button class="btn-save" onclick="saveOrderStatus()">Update Status</button>
+      <div class="fc" style="flex: 1; min-width: 180px;">
+          <label>Delivery Charges (Rs.)</label>
+          <input type="number" id="o-delivery-update" placeholder="Enter delivery charges">
+      </div>
+      <div class="fc" style="flex: 1; min-width: 180px;">
+          <label>Amount Paid by Customer (Rs.)</label> <!-- NEW PAID AMOUNT FIELD -->
+          <input type="number" id="o-paid-update" placeholder="Enter amount already paid">
+      </div>
+      <div class="fc" style="flex: 1; min-width: 180px;">
+          <label>Status:</label>
+          <select id="o-status-update">
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+      </div>
+      <button class="btn-save" onclick="saveOrderStatus()">Update Order</button>
     </div>
   </div>
 </div>
@@ -693,7 +832,7 @@ const firebaseConfig = {
   authDomain: "zmsolarelectric.firebaseapp.com",
   databaseURL: "https://zmsolarelectric-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "zmsolarelectric",
-  storageBucket: "zmsolarelectric.firebasestorage.app",
+  storageBucket: "zmsolarelectric.firebasestorage.app", // Ensure this is correct
   messagingSenderId: "379743641907",
   appId: "1:379743641907:web:88e2104c6f41cd1cb71e46"
 };
@@ -701,6 +840,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+const storage = firebase.storage(); // Initialize Firebase Storage
 
 // Global Variables
 let allProducts = [], allOrders = [], allQuotes = [], allMessages = [];
@@ -761,10 +901,17 @@ document.getElementById('confirm-ok-btn').addEventListener('click', () => {
 // View Switching
 function switchView(viewId) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.nav-item[onclick="switchView('${viewId}')"]`).classList.add('active');
+  
+  const targetNav = document.querySelector(`.nav-item[onclick="switchView('${viewId}')"]`);
+  if(targetNav) targetNav.classList.add('active');
   
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   document.getElementById('view-' + viewId).classList.add('active');
+
+  // Removed settings-specific logic:
+  // if (viewId === 'settings') {
+  //     db.ref('settings').once('value').then(snapshot => { ... });
+  // }
 
   if(window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
@@ -806,9 +953,14 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
 function logout() { auth.signOut(); }
 
 // ============================================================
-// DATA FETCHING (PRODUCTS, ORDERS, QUOTES, MESSAGES)
+// DATA FETCHING (PRODUCTS, ORDERS, QUOTES, MESSAGES, SETTINGS)
 // ============================================================
 function fetchData() {
+  
+  // Removed settings listener
+  // db.ref('settings').on('value', snapshot => { ... });
+
+  // Fetch Products
   db.ref('products').on('value', snapshot => {
     allProducts = [];
     if(snapshot.exists()) { snapshot.forEach(child => { allProducts.push({ key: child.key, ...child.val() }); }); }
@@ -818,6 +970,7 @@ function fetchData() {
     renderProductsTable();
   });
 
+  // Fetch Orders
   db.ref('orders').on('value', snapshot => {
     allOrders = [];
     let pendingCount = 0; let unreadCount = 0;
@@ -838,6 +991,7 @@ function fetchData() {
     updateDashboardRecentOrders();
   });
 
+  // Fetch Quotes
   db.ref('quotes').on('value', snapshot => {
     allQuotes = []; let unreadCount = 0;
     if(snapshot.exists()) {
@@ -853,6 +1007,7 @@ function fetchData() {
     renderQuotesTable(); 
   });
 
+  // Fetch Messages
   db.ref('messages').on('value', snapshot => {
     allMessages = []; let unreadCount = 0;
     if(snapshot.exists()) {
@@ -897,6 +1052,26 @@ function updateDashboardRecentOrders() {
 }
 
 // ============================================================
+// SETTINGS MANAGEMENT (SAVE LOGIC) - REMOVED
+// ============================================================
+/*
+function saveSettings() {
+  const delivery = document.getElementById('setting-delivery').value;
+  const platform = document.getElementById('setting-platform').value;
+  
+  db.ref('settings').set({
+    deliveryCharges: Number(delivery),
+    platformFee: Number(platform)
+  }).then(() => {
+    showToast("Settings Updated Successfully!", "success");
+  }).catch((error) => {
+    showToast("Error updating settings", "danger");
+    console.error(error);
+  });
+}
+*/
+
+// ============================================================
 // PRODUCTS MANAGEMENT
 // ============================================================
 function renderProductsTable() {
@@ -920,6 +1095,15 @@ function openProductModal(prodKey = null) {
   document.getElementById('product-form').reset();
   document.getElementById('p-key').value = ''; 
   document.getElementById('modal-title').textContent = "Add New Product";
+  
+  // Clear image preview and file input on modal open
+  document.getElementById('p-image-upload').value = '';
+  document.getElementById('p-img-url').value = '';
+  document.getElementById('p-image-preview').src = '';
+  document.getElementById('p-image-preview-container').style.display = 'none';
+  document.getElementById('clear-image-btn').style.display = 'none';
+  document.getElementById('image-upload-status').textContent = '';
+
   if (prodKey) {
     const p = allProducts.find(x => x.key === prodKey);
     if (p) {
@@ -931,10 +1115,17 @@ function openProductModal(prodKey = null) {
       document.getElementById('p-price').value = p.price;
       document.getElementById('p-old-price').value = p.oldPrice || '';
       document.getElementById('p-badge').value = p.badge || '';
-      document.getElementById('p-img').value = p.img || '';
       document.getElementById('p-pdf').value = p.pdfLink || '';
       document.getElementById('p-desc').value = p.desc || '';
       document.getElementById('p-datasheet').value = p.datasheetText || ''; 
+      
+      // Populate image fields if an image exists
+      if (p.img) {
+        document.getElementById('p-img-url').value = p.img;
+        document.getElementById('p-image-preview').src = p.img;
+        document.getElementById('p-image-preview-container').style.display = 'block';
+        document.getElementById('clear-image-btn').style.display = 'inline-flex';
+      }
     }
   }
   document.getElementById('product-modal').classList.add('active');
@@ -942,16 +1133,130 @@ function openProductModal(prodKey = null) {
 
 function closeProductModal() { document.getElementById('product-modal').classList.remove('active'); }
 
-document.getElementById('product-form').addEventListener('submit', function(e) {
+// Function to clear product image fields and preview
+function clearProductImage() {
+  document.getElementById('p-image-upload').value = '';
+  document.getElementById('p-img-url').value = '';
+  document.getElementById('p-image-preview').src = '';
+  document.getElementById('p-image-preview-container').style.display = 'none';
+  document.getElementById('clear-image-btn').style.display = 'none';
+  document.getElementById('image-upload-status').textContent = '';
+}
+
+// Event listener for file input change to show preview
+document.getElementById('p-image-upload').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById('p-image-preview');
+  const previewContainer = document.getElementById('p-image-preview-container');
+  const clearBtn = document.getElementById('clear-image-btn');
+  const imgUrlInput = document.getElementById('p-img-url');
+  const statusText = document.getElementById('image-upload-status');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      previewContainer.style.display = 'block';
+      clearBtn.style.display = 'inline-flex';
+      imgUrlInput.value = ''; // Clear URL if file is selected
+      statusText.textContent = '';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // If file input is cleared, hide preview unless a URL is present
+    if (!imgUrlInput.value) {
+      preview.src = '';
+      previewContainer.style.display = 'none';
+      clearBtn.style.display = 'none';
+      statusText.textContent = '';
+    }
+  }
+});
+
+// Event listener for URL input change to show preview
+document.getElementById('p-img-url').addEventListener('input', function(event) {
+  const url = event.target.value;
+  const preview = document.getElementById('p-image-preview');
+  const previewContainer = document.getElementById('p-image-preview-container');
+  const clearBtn = document.getElementById('clear-image-btn');
+  const fileInput = document.getElementById('p-image-upload');
+  const statusText = document.getElementById('image-upload-status');
+
+  if (url) {
+    preview.src = url;
+    previewContainer.style.display = 'block';
+    clearBtn.style.display = 'inline-flex';
+    fileInput.value = ''; // Clear file input if URL is entered
+    statusText.textContent = '';
+  } else {
+    // If URL is cleared, hide preview unless a file is selected
+    if (!fileInput.files[0]) {
+      preview.src = '';
+      previewContainer.style.display = 'none';
+      clearBtn.style.display = 'none';
+      statusText.textContent = '';
+    }
+  }
+});
+
+
+document.getElementById('product-form').addEventListener('submit', async function(e) { 
   e.preventDefault();
-  let pKey = document.getElementById('p-key').value;
+  
+  const pKey = document.getElementById('p-key').value;
   const catVal = document.getElementById('p-cat').value;
+  const imageFile = document.getElementById('p-image-upload').files[0];
+  const imageUrlFromInput = document.getElementById('p-img-url').value.trim(); // Renamed to avoid confusion
+  const statusText = document.getElementById('image-upload-status');
+  
+  let finalImageUrl = imageUrlFromInput; // Default to URL input value
+
+  if (imageFile) {
+    statusText.textContent = 'Uploading image... Please wait.';
+    try {
+      const storageRef = storage.ref();
+      // Generate a unique filename using timestamp and original file name
+      const uniqueFileName = 'products/' + Date.now() + '-' + imageFile.name;
+      const imageRef = storageRef.child(uniqueFileName);
+      
+      const snapshot = await imageRef.put(imageFile); // Upload file
+      finalImageUrl = await snapshot.ref.getDownloadURL(); // Get download URL
+      showToast("Image uploaded successfully!", "success");
+      statusText.textContent = 'Image uploaded.';
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      showToast("Image upload failed: " + error.message, "danger");
+      statusText.textContent = 'Image upload failed.';
+      return; // Stop form submission if image upload fails
+    }
+  } else if (!finalImageUrl) { // If no file and no URL for a new product, or cleared image for existing
+      // Only require image for new products
+      if (!pKey) { 
+          showToast("Please provide an image URL or upload an image.", "danger");
+          statusText.textContent = 'Image is required.';
+          return;
+      }
+      // If editing an existing product and no new image/URL is provided, clear the existing image
+      finalImageUrl = null; 
+  }
+  
   const productData = {
-    id: parseInt(pKey || Date.now()), name: document.getElementById('p-name').value, cat: catVal, catLabel: catLabels[catVal],
-    brand: document.getElementById('p-brand').value, price: parseInt(document.getElementById('p-price').value), oldPrice: parseInt(document.getElementById('p-old-price').value) || null,
-    badge: document.getElementById('p-badge').value || null, img: document.getElementById('p-img').value, pdfLink: document.getElementById('p-pdf').value || null, desc: document.getElementById('p-desc').value,
-    datasheetText: document.getElementById('p-datasheet').value, isService: catVal === 'installation'
+    // If pKey exists, it's an edit, so we don't change the ID. Otherwise, create a new ID.
+    id: pKey ? allProducts.find(p => p.key === pKey).id : Date.now(), 
+    name: document.getElementById('p-name').value, 
+    cat: catVal, 
+    catLabel: catLabels[catVal],
+    brand: document.getElementById('p-brand').value || null, 
+    price: parseInt(document.getElementById('p-price').value), 
+    oldPrice: parseInt(document.getElementById('p-old-price').value) || null,
+    badge: document.getElementById('p-badge').value || null, 
+    img: finalImageUrl, // Use the final image URL from upload or input
+    pdfLink: document.getElementById('p-pdf').value || null, 
+    desc: document.getElementById('p-desc').value || null,
+    datasheetText: document.getElementById('p-datasheet').value || null, 
+    isService: catVal === 'installation'
   };
+
   if (!pKey) { 
       db.ref('products').push(productData).then(() => { closeProductModal(); showToast("Product Added!", "success"); }); 
   } else { 
@@ -983,18 +1288,29 @@ function renderOrdersTable() {
     </tr>
   `).join('');
 }
-
 function viewOrder(key) {
-  const o = allOrders.find(x => x.key === key); if(!o) return; currentOrderId = key;
+  const o = allOrders.find(x => x.key === key); 
+  if(!o) return; 
+  currentOrderId = key;
+  
   if(!o.isRead) { db.ref('orders/' + key).update({ isRead: true }); }
   
   let itemsHtml = (o.items || []).map(i => `<li style="margin-bottom:5px;">${i.name} <b>(x${i.qty})</b> - ${formatPrice(i.price * i.qty)}</li>`).join('');
   let payUrl = o.paymentScreenshotUrl ? `<p style="margin-top:10px;"><b>Receipt:</b> <a href="${o.paymentScreenshotUrl}" target="_blank" style="color:var(--info);">View Screenshot Image</a></p>` : '';
 
+  // Data nikaalte waqt frontend ki tarah structure use karen
+  const bill = o.billing || {};
+  const orderSubtotal = bill.subtotal || 0;
+  const orderDelivery = bill.delivery || 0; 
+  const orderPlatformFee = bill.platformFee || 0; 
+  const orderPaid = bill.paid || 0; // Get existing paid amount
+  const orderTotal = bill.total || (orderSubtotal + orderDelivery + orderPlatformFee); 
+  const balanceDue = orderTotal - orderPaid; // Calculate balance due
+
   document.getElementById('order-details-content').innerHTML = `
     <div style="background:var(--bg2); padding:16px; border-radius:10px; margin-bottom:14px; border:1px solid var(--border);">
       <h3 style="font-size:1rem; color:var(--primary); margin-bottom:8px;">Customer Information</h3>
-      <p style="font-size:0.9rem; margin-bottom:5px;"><b>Name:</b> ${o.customer?.firstName} ${o.customer?.lastName} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Phone:</b> ${o.customer?.phone}</p>
+      <p style="font-size:0.9rem; margin-bottom:5px;"><b>Name:</b> ${o.customer?.firstName} ${o.customer?.lastName} | <b>Phone:</b> ${o.customer?.phone}</p>
       <p style="font-size:0.9rem;"><b>Address:</b> ${o.customer?.address}, ${o.customer?.city}</p>
     </div>
     <div style="margin-bottom:14px;">
@@ -1002,20 +1318,53 @@ function viewOrder(key) {
       <ul style="padding-left:18px; font-size:0.9rem; color:var(--text);">${itemsHtml}</ul>
     </div>
     <div style="background:var(--bg2); padding:16px; border-radius:10px; border:1px solid var(--border);">
-      <h3 style="font-size:1rem; color:var(--primary); margin-bottom:8px;">Billing Information</h3>
-      <p style="font-size:0.9rem; margin-bottom:5px;"><b>Total:</b> ${formatPrice(o.billing?.total || 0)}</p>
-      <p style="font-size:0.9rem;"><b>Payment Method:</b> ${o.billing?.method}</p>
+      <p style="font-size:0.9rem; margin-bottom:5px;"><b>Subtotal:</b> ${formatPrice(orderSubtotal)}</p>
+      <p style="font-size:0.9rem; margin-bottom:5px; color:var(--warning);"><b>Delivery:</b> ${formatPrice(orderDelivery)}</p>
+      ${orderPlatformFee > 0 ? `<p style="font-size:0.9rem; margin-bottom:5px; color:var(--warning);"><b>Platform Fee:</b> ${formatPrice(orderPlatformFee)}</p>` : ''}
+      <p style="font-size:1rem; font-weight:bold;"><b>Total:</b> ${formatPrice(orderTotal)}</p>
+      <p style="font-size:0.9rem; margin-top:10px;"><b>Amount Paid:</b> <span style="font-weight:bold; color:var(--success);">${formatPrice(orderPaid)}</span></p>
+      <p style="font-size:0.9rem;"><b>Balance Due:</b> <span style="font-weight:bold; color:${balanceDue > 0 ? 'var(--danger)' : 'var(--success)'};">${formatPrice(balanceDue)}</span></p>
       ${payUrl}
     </div>`;
     
+  // Input fields mein values set karen
+  document.getElementById('o-delivery-update').value = orderDelivery;
+  document.getElementById('o-paid-update').value = orderPaid; // Set paid amount
   document.getElementById('o-status-update').value = o.status;
   document.getElementById('order-modal').classList.add('active');
 }
 function closeOrderModal() { document.getElementById('order-modal').classList.remove('active'); currentOrderId = null; }
 function saveOrderStatus() { 
     if(currentOrderId) {
-        db.ref('orders/' + currentOrderId).update({ status: document.getElementById('o-status-update').value })
-        .then(() => { closeOrderModal(); showToast("Order Status Updated!", "success"); });
+        // 1. Pehle us order ka data nikalen taake hum subtotal, platform fee dekh saken
+        const order = allOrders.find(x => x.key === currentOrderId);
+        if (!order) return;
+
+        // 2. Input fields se naya data uthayen
+        const newStatus = document.getElementById('o-status-update').value;
+        const newDelivery = parseInt(document.getElementById('o-delivery-update').value) || 0;
+        const newPaid = parseInt(document.getElementById('o-paid-update').value) || 0; // NEW: Get paid amount
+        
+        // 3. Naya Total calculate karen (Subtotal + New Delivery + Platform Fee)
+        const subtotal = order.billing?.subtotal || 0;
+        const platformFee = order.billing?.platformFee || 0; 
+        const newTotal = subtotal + newDelivery + platformFee;
+
+        // 4. Firebase mein update bhejen
+        db.ref('orders/' + currentOrderId).update({ 
+            status: newStatus,
+            "billing/delivery": newDelivery, 
+            "billing/paid": newPaid,       // NEW: Save paid amount
+            "billing/total": newTotal        
+        })
+        .then(() => { 
+            closeOrderModal(); 
+            showToast("Order Ledger Updated!", "success"); // Changed toast message for clarity
+        })
+        .catch((error) => {
+            console.error("Update failed:", error);
+            showToast("Update failed!", "danger");
+        });
     }
 }
 
@@ -1048,9 +1397,13 @@ function viewQuote(key) {
         <div style="background:var(--bg2); padding:16px; border-radius:10px; margin-bottom:14px; border:1px solid var(--border);">
             <h3 style="font-size:1rem; color:var(--primary); margin-bottom:8px;">Customer Information</h3>
             <p style="font-size:0.9rem;"><b>Name:</b> ${q.customer?.name} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Phone:</b> ${q.customer?.phone}</p>
+            ${q.customer?.email ? `<p style="font-size:0.9rem; margin-top:5px;"><b>Email:</b> ${q.customer?.email}</p>` : ''}
+            ${q.customer?.address ? `<p style="font-size:0.9rem; margin-top:5px;"><b>Address:</b> ${q.customer?.address}</p>` : ''}
+            ${q.customer?.houseArea ? `<p style="font-size:0.9rem; margin-top:5px;"><b>House Area:</b> ${q.customer?.houseArea} Marla</p>` : ''}
         </div>
         <div style="background:var(--bg2); padding:16px; border-radius:10px; margin-bottom:14px; border:1px solid var(--border);">
             <h3 style="font-size:1rem; color:var(--primary); margin-bottom:8px;">Utility Details</h3>
+            <p style="font-size:0.9rem; margin-bottom:5px;"><b>Meter Type:</b> ${q.billing?.meterType === 'single-phase' ? 'Single Phase' : 'Three Phase'}</p>
             <p style="font-size:0.9rem; margin-bottom:5px;"><b>Monthly Bill:</b> ${formatPrice(q.billing?.avgBill || 0)} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Units:</b> ${q.billing?.avgUnits || 'N/A'}</p>
             ${q.billing?.billImageUrl ? `<p style="font-size:0.9rem; margin-top:8px;"><a href="${q.billing.billImageUrl}" target="_blank" style="color:var(--info);">View Electricity Bill Image</a></p>`:''}
         </div>
