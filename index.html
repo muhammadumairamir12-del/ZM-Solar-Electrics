@@ -134,8 +134,9 @@
 
 <!-- FIREBASE SDKS -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script> <!-- ADDED AUTH SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script> <!-- Added Firebase Storage SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
 
 <style>
@@ -2329,6 +2330,286 @@
   .bank-app-btn:hover {
       background: var(--teal-dark);
   }
+
+  /* User Login/Register Modal */
+  .auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .auth-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .auth-modal-box {
+    background: var(--primary-bg);
+    border: 1px solid var(--teal-fade);
+    border-radius: 18px;
+    padding: 32px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .auth-modal-overlay.active .auth-modal-box {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .auth-modal-box h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .auth-form-group { margin-bottom: 18px; }
+  .auth-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-dark);
+    margin-bottom: 6px;
+  }
+  .auth-form-group input {
+    width: 100%;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .auth-form-group input:focus { border-color: var(--teal-light); }
+  .auth-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal-main), var(--teal-light));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .auth-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .auth-switch-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--gray-dark);
+  }
+  .auth-switch-text a {
+    color: var(--teal-main);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .auth-error {
+    color: var(--danger);
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+  }
+  .auth-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: white;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s;
+  }
+  .auth-google-btn:hover { background: #F8FAFC; }
+  .auth-google-btn img { width: 20px; height: 20px; }
+  .auth-or-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--gray-mid);
+    font-size: 0.8rem;
+    margin: 20px 0;
+  }
+  .auth-or-divider::before, .auth-or-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .auth-or-divider:not(:empty)::before { margin-right: .25em; }
+  .auth-or-divider:not(:empty)::after { margin-left: .25em; }
+
+
+  /* My Orders Page */
+  .order-card {
+    background: var(--primary-bg);
+    border: 1.5px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--teal-fade);
+  }
+  .order-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+  .order-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .order-status-Pending, .order-status-New-Request { background: var(--teal-pale); color: var(--orange); }
+  .order-status-Confirmed, .order-status-Proposal-Sent { background: #D0EEFF; color: #3b82f6; } /* Light blue */
+  .order-status-Completed, .order-status-Closed { background: #D1FAE5; color: var(--green); } /* Light green */
+  .order-status-Cancelled { background: #FEE2E2; color: var(--danger); } /* Light red */
+
+  .order-summary-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .order-summary-details p {
+    font-size: 0.88rem;
+    color: var(--gray-dark);
+    line-height: 1.6;
+  }
+  .order-summary-details strong { color: var(--text-dark); }
+
+  .order-items-list li {
+    font-size: 0.9rem;
+    color: var(--gray-dark);
+    margin-bottom: 8px;
+  }
+  .order-items-list li strong { color: var(--text-dark); }
+
+  .order-whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    margin-top: 20px;
+  }
+  .order-whatsapp-btn:hover { background: #1da851; }
+
+  /* Login/Register button in navbar */
+  .nav-auth-btn {
+    background: var(--gray-light);
+    color: var(--text-dark);
+    border: 1.5px solid var(--teal-fade);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-auth-btn:hover { background: var(--teal-pale); border-color: var(--teal-light); color: var(--teal-main); }
+  .nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  .nav-user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-light);
+    border: 1.5px solid var(--teal-fade);
+    border-radius: 30px;
+    padding: 6px 14px 6px 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-dark);
+    transition: all 0.2s;
+  }
+  .nav-user-info:hover { background: var(--teal-pale); border-color: var(--teal-light); color: var(--teal-main); }
+  .nav-user-avatar {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--teal-main), var(--teal-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+  }
+  .nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--primary-bg);
+    border: 1px solid var(--teal-fade);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    padding: 10px 0;
+    margin-top: 8px;
+    display: none;
+    z-index: 1001;
+  }
+  .nav-user-menu.active { display: block; }
+  .nav-user-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    color: var(--gray-dark);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .nav-user-menu a:hover { background: var(--teal-pale); color: var(--teal-main); }
+  .nav-user-menu .logout { color: var(--danger); }
+  .nav-user-menu .logout:hover { background: #FEE2E2; }
 </style>
 </head>
 <body>
@@ -2374,9 +2655,10 @@
         <li><a onclick="window.navigate('home')" id="nav-home" class="active">Home</a></li>
         <li><a onclick="window.navigate('products')">Products</a></li>
         <li><a onclick="window.navigate('services')">Services</a></li>
-        <li><a onclick="window.navigate('full-calculator')" id="nav-calc" style="background: var(--teal-pale); color: var(--pink-accent); border: 1.5px solid var(--teal-fade);">✨ Solar Calculator</a></li>
-        <li><a onclick="window.navigate('about')">About Us</a></li>
+        <li><a onclick="window.navigate('full-calculator')" id="nav-calc">Calculator</a></li>
+        <li><a onclick="window.navigate('about')">About</a></li>
         <li><a onclick="window.navigate('contact')">Contact</a></li>
+        <li id="nav-my-orders-item" style="display: none;"><a onclick="window.navigate('my-orders')">My Orders</a></li>
       </ul>
 
       <div class="nav-actions">
@@ -2389,6 +2671,22 @@
           Cart
           <span class="cart-count" id="cart-count">0</span>
         </button>
+
+        <!-- User Authentication Buttons / Dropdown -->
+        <div id="auth-section">
+          <button class="nav-auth-btn" onclick="window.openAuthModal('login')">Login</button>
+        </div>
+        <div class="nav-user-dropdown" id="user-dropdown-section" style="display:none;">
+          <button class="nav-user-info" onclick="window.toggleUserMenu()">
+            <div class="nav-user-avatar" id="user-avatar-initial">U</div>
+            <span id="user-display-name">User</span>
+          </button>
+          <div class="nav-user-menu" id="user-menu">
+            <a onclick="window.navigate('my-orders'); window.toggleUserMenu()">My Orders</a>
+            <a class="logout" onclick="window.logoutUser(); window.toggleUserMenu()">Logout</a>
+          </div>
+        </div>
+
         <div class="hamburger" onclick="toggleMobile()">
           <span></span><span></span><span></span>
         </div>
@@ -2414,6 +2712,9 @@
       <a onclick="window.navigate('about');toggleMobile()">ℹ️ About Us</a>
       <a onclick="window.navigate('contact');toggleMobile()">📞 Contact</a>
       <a onclick="window.navigate('cart');toggleMobile()">🛒 Cart</a>
+      <a onclick="window.navigate('my-orders');toggleMobile()" id="mobile-nav-my-orders" style="display:none;">🛍️ My Orders</a>
+      <a onclick="window.logoutUser();toggleMobile()" id="mobile-nav-logout" style="display:none; color: var(--danger);">🚪 Logout</a>
+      <a onclick="window.openAuthModal('login');toggleMobile()" id="mobile-nav-login" style="display:block;">🔑 Login </a>
     </div>
   </div>
 
@@ -2614,165 +2915,326 @@
 
   </div>
   <!-- END HOME PAGE -->
-   <!-- SOLAR CALCULATOR PAGE -->
-  <div class="page" id="page-full-calculator">
-    <div class="calc-hero">
-      <div class="container">
-        <button class="back-btn" onclick="window.goBack()">← Back</button>
-        <h1 style="font-family:'Playfair Display',serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 16px;">Solar System <span style="color: var(--pink-accent);">Design Calculator</span></h1>
-        <p style="color:rgba(255,255,255,0.8); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Apni requirements batayein aur hum aapko automatically best solar package bana kar denge.</p>
+  <!-- SOLAR CALCULATOR PAGE -->
+<style>
+  /* Custom Styles for the new elements */
+  .budget-slider-container {
+      padding: 30px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+  }
+  
+  /* The Green Line Slider */
+  .green-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 5px;
+      outline: none;
+      margin: 20px 0;
+  }
+  .green-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #10B981; /* Green accent */
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+      transition: transform 0.1s;
+  }
+  .green-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+  }
+  .green-slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #10B981;
+      cursor: pointer;
+  }
+
+  .budget-display {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #10B981;
+      margin-top: 10px;
+  }
+
+  .req-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+  }
+  
+  .req-input {
+      flex: 2;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+  }
+  
+  .qty-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      min-width: 80px;
+  }
+
+  .btn-remove {
+      background: #fee2e2;
+      color: #ef4444;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+  }
+  .btn-remove:hover {
+      background: #fca5a5;
+  }
+
+  .btn-add-req {
+      background: #f1f5f9;
+      color: var(--teal-main, #0f172a);
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.3s;
+  }
+  .btn-add-req:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+  }
+</style>
+
+<div class="page" id="page-full-calculator">
+  <div class="calc-hero">
+    <div class="container">
+      <button class="back-btn" onclick="window.goBack()">← Back</button>
+      <h1 style="font-family:'Playfair Display',serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 16px;">
+          Solar System <span style="color: #10B981;">Design AI</span>
+      </h1>
+      <p style="color:rgba(255,255,255,0.8); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+          Set your budget and tell us what you want to run. Our AI and engineers will design the perfect custom package for you.
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="calc-container">
+      
+      <!-- 1. BUDGET SECTION (The Green Line) -->
+      <h3 class="calc-section-header">1. Select Your Investment Budget</h3>
+      <div class="budget-slider-container">
+          <label style="font-size: 1.1rem; color: #475569; font-weight: 600;">Scroll to select your target budget</label>
+          
+          <!-- Slider from 1 Lakh to 30 Lakhs, steps of 50,000 -->
+          <input type="range" id="budget-slider" class="green-slider" min="100000" max="3000000" step="50000" value="500000" oninput="updateBudgetDisplay()">
+          
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8; font-weight: bold;">
+              <span>Rs. 1 Lakh</span>
+              <span>Rs. 30 Lakhs</span>
+          </div>
+          
+          <div class="budget-display" id="budget-display-text">Rs. 5,00,000</div>
       </div>
+
+      <!-- 2. CUSTOM REQUIREMENTS SECTION -->
+      <h3 class="calc-section-header" style="margin-top: 40px;">2. Your Appliances & Requirements</h3>
+      <p style="color: #64748b; margin-bottom: 16px; font-size: 0.95rem;">Enter exactly what you want to run on solar (e.g., 1.5 Ton AC, Water Motor, Lights) so our AI can understand your load.</p>
+      
+      <div id="dynamic-requirements-list">
+          <!-- Default First Row -->
+          <div class="req-row">
+              <input type="text" class="req-input appliance-name" placeholder="E.g., 1.5 Ton Inverter AC">
+              <input type="number" class="qty-input appliance-qty" min="1" placeholder="Qty" value="1">
+              <button class="btn-remove" onclick="removeRequirement(this)">✖</button>
+          </div>
+          <div class="req-row">
+              <input type="text" class="req-input appliance-name" placeholder="E.g., LED Bulbs & Fans (Mixed)">
+              <input type="number" class="qty-input appliance-qty" min="1" placeholder="Qty" value="5">
+              <button class="btn-remove" onclick="removeRequirement(this)">✖</button>
+          </div>
+      </div>
+      
+      <button class="btn-add-req" onclick="addRequirement()">➕ Add Another Appliance</button>
+
+      <div class="form-group" style="margin-top: 20px;">
+          <label>Any special requirements or notes for our Engineers/AI?</label>
+          <textarea id="ai-context-notes" rows="3" placeholder="E.g., 'I want a hybrid system with battery backup for 4 hours' or 'I plan to add another AC next year.'"></textarea>
+      </div>
+
+      <!-- 3. BILLING INFORMATION -->
+      <h3 class="calc-section-header" style="margin-top: 40px;">3. Current Electricity Details</h3>
+      <div class="form-group">
+          <label>Meter Type <span style="color:var(--pink-accent);">*</span></label>
+          <div class="calc-options">
+              <label style="display:flex;gap:14px;align-items:center;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;flex:1;">
+                  <input type="radio" name="meter-type" value="single-phase" checked style="accent-color:#10B981;"> <span style="font-weight:600;">Single Phase</span>
+              </label>
+              <label style="display:flex;gap:14px;align-items:center;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;flex:1;">
+                  <input type="radio" name="meter-type" value="three-phase" style="accent-color:#10B981;"> <span style="font-weight:600;">Three Phase</span>
+              </label>
+          </div>
+      </div>
+      <div class="form-grid">
+          <div class="form-group">
+              <label>Average electricity bill (per month)</label>
+              <input type="number" id="full-calc-bill" min="0" step="1000" placeholder="e.g. 30000">
+          </div>
+          <div class="form-group">
+              <label>Average electricity units (per month)</label>
+              <input type="number" id="full-calc-units" min="0" step="10" placeholder="e.g. 500">
+          </div>
+      </div>
+
+      <!-- 4. CONTACT INFORMATION -->
+      <h3 class="calc-section-header" style="margin-top: 40px;">4. Contact Information</h3>
+      <div class="form-group">
+          <label>Full Name <span style="color:var(--pink-accent);">*</span></label>
+          <input type="text" id="full-calc-name" placeholder="Your Full Name">
+      </div>
+      <div class="form-grid">
+          <div class="form-group">
+              <label>Phone <span style="color:var(--pink-accent);">*</span></label>
+              <input type="tel" id="full-calc-phone" placeholder="+92 3XX XXXXXXX">
+          </div>
+          <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="full-calc-email" placeholder="you@example.com">
+          </div>
+      </div>
+      <div class="form-group">
+          <label>Full Address <span style="color:var(--pink-accent);">*</span></label>
+          <textarea id="full-calc-address" rows="2" placeholder="House No., Street, Area, City"></textarea>
+      </div>
+      
+      <button class="btn-blue" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 40px; background-color: #10B981; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold;" onclick="submitSmartQuote()">
+        ✨ Send to AI & Request Custom Design
+      </button>
     </div>
 
-    <div class="container">
-      <div class="calc-container">
-        
-        <h3 class="calc-section-header">1. Billing Information</h3>
-        <div class="form-group">
-            <label>Meter Type <span style="color:var(--pink-accent);">*</span></label>
-            <div class="calc-options">
-                <label style="display:flex;gap:14px;align-items:center;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;flex:1;">
-                    <input type="radio" name="meter-type" value="single-phase" checked style="accent-color:var(--teal-main);"> <span style="font-weight:600;">Single Phase</span>
-                </label>
-                <label style="display:flex;gap:14px;align-items:center;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;flex:1;">
-                    <input type="radio" name="meter-type" value="three-phase" style="accent-color:var(--teal-main);"> <span style="font-weight:600;">Three Phase</span>
-                </label>
-            </div>
-        </div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Average electricity bill (per month) <span style="color:var(--pink-accent);">*</span></label>
-                <input type="number" id="full-calc-bill" value="30000" min="0" step="1000" oninput="updateFullCalcDisplay()" placeholder="e.g. 30000">
-            </div>
-            <div class="form-group">
-                <label>Average electricity units (per month) <span style="color:var(--pink-accent);">*</span></label>
-                <input type="number" id="full-calc-units" value="500" min="0" step="10" oninput="updateFullCalcDisplay()" placeholder="e.g. 500">
-            </div>
-        </div>
-        <div class="form-group">
-            <label>Upload your electricity bill (Max file size: 5 MB)</label>
-            <input type="file" id="full-calc-bill-upload" accept=".pdf,.jpg,.png">
-        </div>
-
-        <h3 class="calc-section-header" style="margin-top: 40px;">2. Contact Information</h3>
-        <div class="form-group">
-            <label>Full Name <span style="color:var(--pink-accent);">*</span></label>
-            <input type="text" id="full-calc-name" placeholder="Your Full Name">
-        </div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Phone <span style="color:var(--pink-accent);">*</span></label>
-                <input type="tel" id="full-calc-phone" placeholder="+92 3XX XXXXXXX">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="full-calc-email" placeholder="you@example.com">
-            </div>
-        </div>
-        <div class="form-group">
-            <label>House Area (Marla)</label>
-            <input type="number" id="full-calc-area" min="0" placeholder="e.g. 5, 10, 20">
-        </div>
-        <div class="form-group">
-            <label>Full Address <span style="color:var(--pink-accent);">*</span></label>
-            <textarea id="full-calc-address" rows="3" placeholder="House No., Street, Area, City"></textarea>
-        </div>
-
-        <h3 class="calc-section-header" style="margin-top: 40px;">3. Load Calculator</h3>
-        <div style="font-family:'Playfair Display', serif; font-size:1.6rem; font-weight:700; color:var(--teal-main); margin-bottom:20px;">
-            Load Calculated: <span id="total-load-kw">0</span> kW
-        </div>
-        <div class="load-calculator-grid">
-            <div class="load-item">
-                <label>LED Bulbs (10W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('led-bulbs', -1)">-</button>
-                    <input type="number" id="led-bulbs" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('led-bulbs', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>Tube Lights (40W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('tube-lights', -1)">-</button>
-                    <input type="number" id="tube-lights" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('tube-lights', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>Fans (75W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('fans', -1)">-</button>
-                    <input type="number" id="fans" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('fans', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>Refrigerators (200W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('refrigerators', -1)">-</button>
-                    <input type="number" id="refrigerators" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('refrigerators', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>AC 1 Ton (Inverter, 1000W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-1ton', -1)">-</button>
-                    <input type="number" id="ac-1ton" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-1ton', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>AC 1.5 Ton (Inverter, 1500W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-1.5ton', -1)">-</button>
-                    <input type="number" id="ac-1.5ton" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-1.5ton', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>AC 2 Ton (Inverter, 2000W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-2ton', -1)">-</button>
-                    <input type="number" id="ac-2ton" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ac-2ton', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>UPS (1kW)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ups-1kw', -1)">-</button>
-                    <input type="number" id="ups-1kw" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('ups-1kw', 1)">+</button>
-                </div>
-            </div>
-            <div class="load-item">
-                <label>Motor (1HP ~ 750W)</label>
-                <div class="load-qty-control">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('motor-1hp', -1)">-</button>
-                    <input type="number" id="motor-1hp" value="0" min="0" oninput="calculateTotalLoad()" class="load-qty-input">
-                    <button class="load-qty-btn" onclick="updateApplianceQty('motor-1hp', 1)">+</button>
-                </div>
-            </div>
-        </div>
-        
-        <button class="btn-blue" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 40px;" onclick="window.requestFullQuote()">
-          ✅ Request My Custom Quote
-        </button>
-      </div>
-
-      <!-- Results Container (for the full calculator) -->
-      <div id="full-calc-results" style="display: none; padding-bottom: 60px;">
-        <div class="section-header">
-          <div class="section-tag">Your Custom Solution</div>
-          <h2 class="section-title">Recommended Packages</h2>
-          <p class="section-sub">Aapki requirements ke mutabiq humne yeh complete packages tayar kiye hain.</p>
-        </div>
-        <div id="full-packages-container"></div>
+    <!-- Results Container -->
+    <div id="full-calc-results" style="display: none; padding-bottom: 60px; margin-top: 40px;">
+      <div class="section-header" style="text-align: center;">
+        <div class="section-tag" style="color: #10B981;">Submission Successful</div>
+        <h2 class="section-title">We've Received Your Details!</h2>
+        <p class="section-sub">Our AI and engineering team are reviewing your custom requirements and budget. We will contact you shortly with the best package.</p>
       </div>
     </div>
   </div>
+</div>
+
+<script>
+  // 1. Update the Budget Display as the user scrolls the green line
+  function updateBudgetDisplay() {
+      const slider = document.getElementById("budget-slider");
+      const display = document.getElementById("budget-display-text");
+      
+      // Formatting the number into Indian/Pakistani Lakhs system (e.g. 5,00,000)
+      const formattedValue = parseInt(slider.value).toLocaleString('en-IN');
+      display.innerText = "Rs. " + formattedValue;
+  }
+
+  // 2. Add dynamic requirement rows
+  function addRequirement() {
+      const container = document.getElementById("dynamic-requirements-list");
+      const row = document.createElement("div");
+      row.className = "req-row";
+      row.innerHTML = `
+          <input type="text" class="req-input appliance-name" placeholder="E.g., Water Pump / Iron / TV">
+          <input type="number" class="qty-input appliance-qty" min="1" placeholder="Qty" value="1">
+          <button class="btn-remove" onclick="removeRequirement(this)">✖</button>
+      `;
+      container.appendChild(row);
+  }
+
+  // 3. Remove requirement rows
+  function removeRequirement(button) {
+      const row = button.parentElement;
+      row.remove();
+  }
+
+  // 4. Submit logic - Gathers all the custom data brilliantly for the Admin/AI
+  function submitSmartQuote() {
+      // Collect Budget
+      const budget = document.getElementById("budget-slider").value;
+
+      // Collect Appliances
+      const appliances = [];
+      const applianceRows = document.querySelectorAll('.req-row');
+      applianceRows.forEach(row => {
+          const name = row.querySelector('.appliance-name').value.trim();
+          const qty = row.querySelector('.appliance-qty').value;
+          if(name !== "") {
+              appliances.push({ item: name, quantity: qty });
+          }
+      });
+
+      // Collect Notes & Billing
+      const extraNotes = document.getElementById("ai-context-notes").value;
+      const meterType = document.querySelector('input[name="meter-type"]:checked').value;
+      const monthlyBill = document.getElementById("full-calc-bill").value;
+      const monthlyUnits = document.getElementById("full-calc-units").value;
+
+      // Collect Contact
+      const name = document.getElementById("full-calc-name").value;
+      const phone = document.getElementById("full-calc-phone").value;
+      const email = document.getElementById("full-calc-email").value;
+      const address = document.getElementById("full-calc-address").value;
+
+      // Simple Validation
+      if(!name || !phone || !address) {
+          alert("Please fill out your Name, Phone, and Address so we can contact you.");
+          return;
+      }
+
+      // Create structured JSON payload (Perfect for sending to backend or AI)
+      const leadData = {
+          client: {
+              name: name,
+              phone: phone,
+              email: email,
+              address: address
+          },
+          budget: budget,
+          requirements: appliances,
+          extraNotes: extraNotes,
+          billingDetails: {
+              meter: meterType,
+              billAmount: monthlyBill,
+              units: monthlyUnits
+          }
+      };
+
+      // Logging it to console so you see exactly how clean it is for the admin
+      console.log("SENDING DATA TO ADMIN/AI:", JSON.stringify(leadData, null, 2));
+
+      // Show Success Section
+      document.querySelector('.calc-container').style.display = 'none';
+      document.getElementById('full-calc-results').style.display = 'block';
+      
+      // Here you would typically use fetch() or AJAX to send 'leadData' to your server or email.
+      // E.g., fetch('/api/submit-lead', { method: 'POST', body: JSON.stringify(leadData) })
+  }
+
+  // Initialize display on page load
+  document.addEventListener('DOMContentLoaded', updateBudgetDisplay);
+ </script>
 
 
   <!-- ALL PRODUCTS PAGE -->
@@ -3032,6 +3494,26 @@
     </div>
   </div>
 
+  <!-- MY ORDERS PAGE -->
+  <div class="page" id="page-my-orders">
+    <div class="plp-hero">
+      <div class="container">
+        <button class="back-btn" onclick="window.goBack()">← Back</button>
+        <h1>🛍️ My Orders</h1>
+        <p>Aapke pichle orders ki tafseel yahan maujood hai</p>
+      </div>
+    </div>
+    <div class="container" style="padding: 48px 0;">
+      <div id="my-orders-list">
+        <div class="empty-state">
+          <h3>No orders yet</h3>
+          <p>You haven't placed any orders with us.</p>
+          <button class="btn-blue" onclick="window.navigate('products')" style="margin-top:20px;">Start Shopping</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ABOUT PAGE -->
   <div class="page" id="page-about">
     <div class="about-hero">
@@ -3260,6 +3742,7 @@
             <li><a onclick="window.navigate('services')">Services</a></li>
             <li><a onclick="window.navigate('about')">About Us</a></li>
             <li><a onclick="window.navigate('contact')">Contact</a></li>
+            <li id="footer-my-orders-item" style="display: none;"><a onclick="window.navigate('my-orders')">My Orders</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -3313,6 +3796,33 @@
 <!-- Toast Notification -->
 <div class="toast" id="toast">✓ Added to cart!</div>
 
+<!-- User Login/Register Modal -->
+<div class="auth-modal-overlay" id="auth-modal-overlay">
+  <div class="auth-modal-box">
+    <button class="modal-close-btn" style="position:absolute; top:20px; right:20px; z-index:1001;" onclick="window.closeAuthModal()">✕</button>
+    <h2 id="auth-modal-title">Login to Your Account</h2>
+    <form id="auth-form">
+      <div class="auth-form-group">
+        <label for="auth-email">Email</label>
+        <input type="email" id="auth-email" required placeholder="your.email@example.com">
+      </div>
+      <div class="auth-form-group">
+        <label for="auth-password">Password</label>
+        <input type="password" id="auth-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="auth-submit-btn" id="auth-submit-button">Login</button>
+      <div class="auth-error" id="auth-error">Invalid email or password.</div>
+      <div class="auth-or-divider">OR</div>
+      <button type="button" class="auth-google-btn" onclick="window.signInWithGoogle()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google logo">
+        Continue with Google
+      </button>
+      <div class="auth-switch-text" id="auth-switch-text">
+        Don't have an account? <a href="#" onclick="window.switchAuthMode()">Register here</a>
+      </div>
+    </form>
+  </div>
+</div>
 <script>
 // ============================================================
 // FIREBASE CONFIGURATION & INITIALIZATION
@@ -3327,573 +3837,321 @@ const firebaseConfig = {
   appId: "1:379743641907:web:88e2104c6f41cd1cb71e46"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const storage = firebase.storage(); // Initialize Firebase Storage
-
+const auth    = firebase.auth();
+const db      = firebase.database();
+const storage = firebase.storage();
 
 // ============================================================
-// DATA: HARDCODED FALLBACK PRODUCTS (UPDATED WITH NEW IMAGES)
+// GLOBAL STATE
 // ============================================================
 window.allProducts = [
   // SOLAR PANELS
-  { 
-    id: 1, name: 'Jinko Solar 550W Mono PERC Panel', cat: 'solar-panels', catLabel: 'Solar Panels', price: 18500, oldPrice: 20000,
-    desc: '550W monocrystalline PERC panel with 25-year performance warranty. Tier 1 brand.', 
-    datasheetText: 'Electrical Characteristics:\n- Maximum Power (Pmax): 550W\n- Maximum Power Voltage (Vmp): 40.90V\n- Maximum Power Current (Imp): 13.45A\n- Open-circuit Voltage (Voc): 49.62V\n- Short-circuit Current (Isc): 14.03A\n- Module Efficiency STC (%): 21.33%\n- Operating Temperature (℃): -40℃~+85℃\n\nMechanical Characteristics:\n- Cell Type: P type Mono-crystalline\n- No. of cells: 144 (6×24)\n- Dimensions: 2274×1134×35mm\n- Weight: 28.9 kg\n- Front Glass: 3.2mm, Anti-Reflection Coating\n- Frame: Anodized Aluminium Alloy\n- Junction Box: IP68 Rated\n- Output Cables: TUV 1×4.0mm2\n\nWarranty:\n12-year product warranty\n25-year linear power warranty.',
+  {
+    id: 1, name: 'Jinko Solar 550W Mono PERC Panel', cat: 'solar-panels', catLabel: 'Solar Panels',
+    price: 18500, oldPrice: 20000,
+    desc: '550W monocrystalline PERC panel with 25-year performance warranty. Tier 1 brand.',
+    datasheetText: 'Electrical Characteristics:\n- Maximum Power (Pmax): 550W\n- Vmp: 40.90V\n- Imp: 13.45A\n- Voc: 49.62V\n- Isc: 14.03A\n- Efficiency STC: 21.33%\n- Operating Temp: -40℃~+85℃\n\nMechanical:\n- Cell Type: P-type Mono\n- Cells: 144 (6×24)\n- Dimensions: 2274×1134×35mm\n- Weight: 28.9 kg\n- Junction Box: IP68\n\nWarranty: 12yr product / 25yr linear power.',
     pdfLink: 'https://www.jinkosolar.com/uploads/550W-Datasheet.pdf',
-    badge: 'Best Seller', brand: 'Jinko Solar', 
-    img: 'https://media.istockphoto.com/id/1681913304/photo/close-up-of-solar-cell.webp?a=1&b=1&s=612x612&w=0&k=20&c=VgZiLWm6zW5u_PfhYeMO013lOrXkbhdmYfrXzZu5IwM=', 
-    specs: { Power: '550W', Type: 'Monocrystalline PERC', Efficiency: '21.3%', Warranty: '25 Years' } 
+    badge: 'Best Seller', brand: 'Jinko Solar',
+    img: 'https://media.istockphoto.com/id/1681913304/photo/close-up-of-solar-cell.webp?a=1&b=1&s=612x612&w=0&k=20&c=VgZiLWm6zW5u_PfhYeMO013lOrXkbhdmYfrXzZu5IwM=',
+    specs: { Power: '550W', Type: 'Monocrystalline PERC', Efficiency: '21.3%', Warranty: '25 Years' }
   },
-  { 
-    id: 2, name: 'LONGi Green 580W Hi-MO6', cat: 'solar-panels', catLabel: 'Solar Panels', price: 21000, 
-    desc: 'Latest LONGi Hi-MO6 technology with superior low-light performance. Anti-PID.', 
-    datasheetText: 'Advanced N-Type TOPCon cell technology. High efficiency up to 22.1%. Better degradation resistance. Complete protection against harsh weather environments including salt mist and ammonia. Built for long-term reliability.',
-    badge: 'New', brand: 'LONGi', 
-    img: 'https://media.istockphoto.com/id/2169667626/photo/solar-powered-home-close-up.webp?a=1&b=1&s=612x612&w=0&k=20&c=I8rJionDe2nhREMQC-crqQLrjpsOE4vddyDD0Uu8NvU=', 
-    specs: { Power: '580W', Type: 'N-Type TOPCon', Efficiency: '22.1%', Warranty: '25 Years' } 
-  },
-  { 
-    id: 3, name: 'Canadian Solar 540W BiHiKu6', cat: 'solar-panels', catLabel: 'Solar Panels', price: 19500, 
-    desc: 'Bifacial solar panel with up to 30% extra energy gain from rear side reflection.', badge: null, brand: 'Canadian Solar', 
-    img: 'https://plus.unsplash.com/premium_photo-1679917152562-09bb29e555c1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHNvbGFyJTIwcGFuZWx8ZW58MHx8MHx8fDA%3D', 
-    specs: { Power: '540W', Type: 'Bifacial PERC', Efficiency: '20.9%', Warranty: '25 Years' } 
-  },
-  { 
-    id: 4, name: 'Risen Energy 500W RSM Poly', cat: 'solar-panels', catLabel: 'Solar Panels', price: 14000, 
-    desc: 'Reliable polycrystalline panels ideal for budget-conscious installations.', badge: null, brand: 'Risen Energy', 
-    img: 'https://media.istockphoto.com/id/1681913304/photo/close-up-of-solar-cell.webp?a=1&b=1&s=612x612&w=0&k=20&c=VgZiLWm6zW5u_PfhYeMO013lOrXkbhdmYfrXzZu5IwM=', 
-    specs: { Power: '500W', Type: 'Polycrystalline', Efficiency: '18.7%', Warranty: '25 Years' } 
-  },
-
   // INVERTERS
-  { id: 5, name: 'Growatt SPH 5000 Hybrid Inverter', cat: 'inverters', catLabel: 'Inverters', price: 95000, oldPrice: 105000, desc: '5kW hybrid solar inverter with built-in MPPT.', datasheetText: 'Max. DC Voltage: 550V\nStart Voltage: 150V\nNominal DC Voltage: 360V\nMPPT Voltage Range: 150V-550V\nNo. of MPP Trackers: 2\nMax. Input Current per Tracker: 12A\nAC Nominal Power: 5000W\nMax. AC Apparent Power: 5000VA\nNominal AC Voltage: 230V\nAC Grid Frequency: 50/60Hz', pdfLink: 'https://example.com/growatt-5kw.pdf', badge: 'Best Seller', brand: 'Growatt', img: 'https://kamalsolar.pk/cdn/shop/files/Knox04KWHybrid_1-min_750x.png?v=1737898390', specs: { Power: '5000W', Type: 'Hybrid', Warranty: '5 Years' } },
-  { id: 6, name: 'SolarEdge SE10K On-Grid Inverter', cat: 'inverters', catLabel: 'Inverters', price: 145000, desc: '10kW premium on-grid inverter with DC optimizers.', badge: 'Premium', brand: 'SolarEdge', img: 'https://kamalsolar.pk/cdn/shop/files/Knox_03KW_Hybrid_1_750x.png?v=1738083132', specs: { Power: '10000W', Type: 'On-Grid', Warranty: '12 Years' } },
-  { id: 8, name: 'Deye 8kW Hybrid 3-Phase', cat: 'inverters', catLabel: 'Inverters', price: 185000, desc: '3-phase hybrid inverter for commercial installations.', badge: 'Commercial', brand: 'Deye', img: 'https://kamalsolar.pk/cdn/shop/files/Knox_03KW_Hybrid_1_750x.png?v=1738083132', specs: { Power: '8000W', Type: 'Hybrid 3-Phase', Warranty: '5 Years' } },
-
-  // BATTERIES
-  { id: 9, name: 'Pylon Tech US3000C 3.5kWh LiFePO4', cat: 'batteries', catLabel: 'Batteries', price: 115000, desc: 'Lithium iron phosphate battery with 6000+ cycles.', badge: 'Premium', brand: 'Pylontech', img: 'https://kamalsolar.pk/cdn/shop/files/Knox_03KW_Hybrid_1_-min_750x.png?v=1737954600', specs: { Capacity: '3.5kWh', Voltage: '48V', Warranty: '10 Years' } },
-  { id: 10, name: 'Volta 200Ah AGM Battery', cat: 'batteries', catLabel: 'Batteries', price: 28000, desc: 'Maintenance-free sealed AGM battery.', badge: 'Popular', brand: 'Volta', img: 'https://t4.ftcdn.net/jpg/04/95/13/69/360_F_495136962_fxansiKO1v1KC15PS8WLAK85aD0Ag1Kq.jpg', specs: { Capacity: '200Ah', Voltage: '12V', Warranty: '2 Years' } },
-
-  // GENERATORS
-  { id: 13, name: 'Honda EP2500 2.5kVA Generator', cat: 'generators', catLabel: 'Generators', price: 85000, desc: 'Reliable Honda petrol generator with OHC engine.', badge: 'Best Seller', brand: 'Honda', img: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=600&auto=format&fit=crop&q=60', specs: { Power: '2500VA', Fuel: 'Petrol', Warranty: '2 Years' } },
-
-  // UPS SYSTEMS
-  { id: 16, name: 'APC Smart-UPS 2kVA Online', cat: 'ups', catLabel: 'UPS Systems', price: 72000, desc: 'True online double-conversion UPS for servers.', badge: 'Best Seller', brand: 'APC', img: 'https://images.unsplash.com/photo-1604251806132-6b149e8e6730?w=600&auto=format&fit=crop&q=60', specs: { Power: '2000VA', Transfer: '0ms', Warranty: '2 Years' } },
-
-  // WATER PUMPS
-  { id: 19, name: 'Lorentz PS2 Solar Water Pump', cat: 'water-pumps', catLabel: 'Water Pumps', price: 45000, desc: 'DC solar submersible pump for agricultural use. Works directly on solar panels.', badge: 'Agricultural', brand: 'Lorentz', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwNSNqd3HvUNyb_sxvdXLiwlTREaSquRNu2g&s', specs: { Flow: '3m³/hour', MaxHead: '80m', Warranty: '3 Years' } },
-  { id: 20, name: 'Grundfos SQ Solar Pump System', cat: 'water-pumps', catLabel: 'Water Pumps', price: 68000, desc: 'Complete solar pump system for bore holes up to 100m depth.', badge: 'Complete Kit', brand: 'Grundfos', img: 'https://t3.ftcdn.net/jpg/02/39/23/98/360_F_239239871_989YEqgLnwsEDqoW3GpMXCl0NWxJHLyG.jpg', specs: { Flow: '5m³/hour', MaxHead: '100m', Warranty: '2 Years' } },
-
-  // CABLES & WIRES
-  { id: 21, name: 'Copper Wires (10mm)', cat: 'cables-wires', catLabel: 'Cables & Wires', price: 2200, desc: 'High-quality copper wires for solar installations, resistant to heat.', badge: 'Best Seller', brand: 'Generic', img: 'https://www.kei-ind.com/wp-content/uploads/2023/06/benefits-and-types-of-electrical-wire.jpg', specs: { Type: 'Copper', Gauge: '10mm', Length: '100m Roll' } },
-  { id: 22, name: 'Solar DC Cable (4mm² Red/Black)', cat: 'cables-wires', catLabel: 'Cables & Wires', price: 1500, desc: 'UV resistant solar DC cables for connecting panels to inverters.', badge: null, brand: 'Generic', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDQj28oqGt0eDXHXLW3R69L3_n-fd28B6Frw&s', specs: { Type: 'Solar DC', Gauge: '4mm²', UVResistant: 'Yes' } },
-
-  // SERVICES
-  { id: 101, name: 'Home Solar Installation', cat: 'installation', catLabel: 'Installation', price: 50000, desc: 'Professional rooftop installation for standard home systems.', badge: 'Popular', brand: 'ZM Solar', img: 'https://plus.unsplash.com/premium_photo-1682148205811-e8a8ce759f4b?w=600&auto=format&fit=crop&q=60', isService: true },
-  { id: 102, name: 'Commercial Installation', cat: 'installation', catLabel: 'Installation', price: 150000, desc: 'Large scale commercial solar installations.', badge: null, brand: 'ZM Solar', img: 'https://plus.unsplash.com/premium_photo-1682148205811-e8a8ce759f4b?w=600&auto=format&fit=crop&q=60', isService: true }
-
-  
-  
-  
-];
-// State variables
-let cart = [];
-let currentPage = 'home';
-let previousPage = 'home';
-let currentCat = null;
-let currentProductId = null;
-let paymentScreenshotFile = null; // To hold the uploaded file temporarily
-
-// Hardcoded Payment Info (UPDATE THESE DETAILS FOR YOUR CLIENT)
-const paymentInfo = {
-  jazzcash: {
-    accountHolder: 'ZM Solar & Electric',
-    mobileNumber: '03091453343' // Updated JazzCash/EasyPaisa number
+  {
+    id: 2, name: 'Growatt SPH 5000 Hybrid Inverter', cat: 'inverters', catLabel: 'Inverters',
+    price: 95000, oldPrice: 105000,
+    desc: '5kW hybrid solar inverter with built-in MPPT and battery management.',
+    datasheetText: 'Max DC Voltage: 550V\nStart Voltage: 150V\nMPPT Range: 150V-550V\nNo. of Trackers: 2\nAC Nominal Power: 5000W\nNominal AC Voltage: 230V\nAC Grid Frequency: 50/60Hz',
+    pdfLink: 'https://www.growatt.com/download/Growatt-SPH-5000-Datasheet.pdf',
+    badge: 'Best Seller', brand: 'Growatt',
+    img: 'https://kamalsolar.pk/cdn/shop/files/Knox04KWHybrid_1-min_750x.png?v=1737898390',
+    specs: { Power: '5000W', Type: 'Hybrid', Warranty: '5 Years' }
   },
-  bankTransfer: {
-    accountHolder: 'Muhammad Abdullah Tahir',
-    bankName: 'Habib Bank Limited (HBL)',
-    iban: '24837909164303' // IMPORTANT: Update this with your actual IBAN
+  // BATTERIES
+  {
+    id: 3, name: 'Pylon Tech US3000C 3.5kWh LiFePO4', cat: 'batteries', catLabel: 'Batteries',
+    price: 115000,
+    desc: 'Lithium iron phosphate battery with 6000+ cycles and 10-year warranty.',
+    badge: 'Premium', brand: 'Pylontech',
+    img: 'https://kamalsolar.pk/cdn/shop/files/Knox_03KW_Hybrid_1_-min_750x.png?v=1737954600',
+    specs: { Capacity: '3.5kWh', Voltage: '48V', Warranty: '10 Years' }
+  },
+  // GENERATORS
+  {
+    id: 4, name: 'Honda EP2500 2.5kVA Generator', cat: 'generators', catLabel: 'Generators',
+    price: 85000,
+    desc: 'Reliable Honda petrol generator with OHC engine and AVR voltage regulation.',
+    badge: 'Best Seller', brand: 'Honda',
+    img: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=600&auto=format&fit=crop&q=60',
+    specs: { Power: '2500VA', Fuel: 'Petrol', Warranty: '2 Years' }
+  },
+  // UPS
+  {
+    id: 5, name: 'APC Smart-UPS 2kVA Online', cat: 'ups', catLabel: 'UPS Systems',
+    price: 72000,
+    desc: 'True online double-conversion UPS for servers and critical equipment.',
+    badge: 'Best Seller', brand: 'APC',
+    img: 'https://images.unsplash.com/photo-1604251806132-6b149e8e6730?w=600&auto=format&fit=crop&q=60',
+    specs: { Power: '2000VA', Transfer: '0ms', Warranty: '2 Years' }
+  },
+  // WATER PUMPS
+  {
+    id: 6, name: 'Lorentz PS2 Solar Water Pump', cat: 'water-pumps', catLabel: 'Water Pumps',
+    price: 45000,
+    desc: 'DC solar submersible pump for agricultural use. Works directly on solar panels.',
+    badge: 'Agricultural', brand: 'Lorentz',
+    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwNSNqd3HvUNyb_sxvdXLiwlTREaSquRNu2g&s',
+    specs: { Flow: '3m³/hour', MaxHead: '80m', Warranty: '3 Years' }
+  },
+  // CABLES
+  {
+    id: 7, name: 'Solar DC Cable 4mm² (Red/Black)', cat: 'cables-wires', catLabel: 'Cables & Wires',
+    price: 1500,
+    desc: 'UV resistant solar DC cables for connecting panels to inverters.',
+    badge: 'Best Seller', brand: 'Generic',
+    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDQj28oqGt0eDXHXLW3R69L3_n-fd28B6Frw&s',
+    specs: { Type: 'Solar DC', Gauge: '4mm²', UVResistant: 'Yes' }
+  },
+  // INSTALLATION SERVICES
+  {
+    id: 101, name: 'Home Solar Installation', cat: 'installation', catLabel: 'Installation',
+    price: 50000,
+    desc: 'Professional rooftop installation for standard home systems.',
+    badge: 'Popular', brand: 'ZM Solar',
+    img: 'https://media.istockphoto.com/id/114338035/photo/solar-panel-installation.jpg?s=612x612&w=0&k=20&c=P3K0opLbTHWjGYS5FUg6wHKcJEDW4WoXWmy2WRM_4-o=',
+    isService: true
   }
+];
+
+let cart           = [];
+let currentPage    = 'home';
+let previousPage   = 'home';
+let currentCat     = null;
+let currentProductId = null;
+let paymentScreenshotFile = null;
+let loggedInUser   = null;
+let userProfile    = null;
+let isLoginMode    = true;
+let pdpQty         = 1;
+
+const ADMIN_WA = "923091453343";
+
+const paymentInfo = {
+  jazzcash: { accountHolder: 'ZM Solar & Electric', mobileNumber: '03091453343' },
+  bankTransfer: { accountHolder: 'Muhammad Abdullah Tahir', bankName: 'Habib Bank Limited (HBL)', iban: 'PK23HBL00000024837909164303' }
 };
 
 let fullCalcState = {
-  meterType: 'single-phase', avgBill: 30000, avgUnits: 500, uploadBill: null, fullName: '', phone: '', email: '', houseArea: '', fullAddress: '',
-  appliances: { 'led-bulbs': 0, 'tube-lights': 0, 'fans': 0, 'refrigerators': 0, 'ac-1ton': 0, 'ac-1.5ton': 0, 'ac-2ton': 0, 'ups-1kw': 0, 'motor-1hp': 0 },
+  meterType: 'single-phase', avgBill: 30000, avgUnits: 500,
+  appliances: { 'led-bulbs': 0, 'tube-lights': 0, 'fans': 0, 'refrigerators': 0,
+                'ac-1ton': 0, 'ac-1.5ton': 0, 'ac-2ton': 0, 'ups-1kw': 0, 'motor-1hp': 0 },
   totalLoadKw: 0
 };
 
 const appliancePower = {
-  'led-bulbs': 0.01, 'tube-lights': 0.04, 'fans': 0.075, 'refrigerators': 0.2, 'ac-1ton': 1, 'ac-1.5ton': 1.5, 'ac-2ton': 2, 'ups-1kw': 1, 'motor-1hp': 0.75,
+  'led-bulbs': 0.01, 'tube-lights': 0.04, 'fans': 0.075, 'refrigerators': 0.2,
+  'ac-1ton': 1, 'ac-1.5ton': 1.5, 'ac-2ton': 2, 'ups-1kw': 1, 'motor-1hp': 0.75
 };
 
-function getCatImageHtml(cat) {
-  const images = {
-    'solar-panels': "https://media.istockphoto.com/id/1681913304/photo/close-up-of-solar-cell.webp?a=1&b=1&s=612x612&w=0&k=20&c=VgZiLWm6zW5u_PfhYeMO013lOrXkbhdmYfrXzZu5IwM=",
-    'inverters': "https://kamalsolar.pk/cdn/shop/files/LIVOLTEK6.2KWsolarinverterhybrid_1066x.png?v=1751349951",
-    'batteries': "https://kamalsolar.pk/cdn/shop/files/DynessLithiumBattery51.2V100Amp_1066x.png?v=1763548804",
-    'generators': "https://media.istockphoto.com/id/182192586/photo/portable-electric-generator.jpg?s=612x612&w=0&k=20&c=xQzHBE_g29RdGV-AZbqek0JQzHifxOD-z3lExi1MfDs=",
-    'ups': "https://www.shutterstock.com/image-photo/uninterruptible-power-supply-backup-ups-260nw-2452490307.jpg",
-    'water-pumps': "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwNSNqd3HvUNyb_sxvdXLiwlTREaSquRNu2g&s",
-    'cables-wires': "https://media.istockphoto.com/id/144349803/photo/cables.jpg?s=612x612&w=0&k=20&c=7fht3zJSEXu3j1XQCEC9bMGt4n95AGGkC5GafmHd5o=",
-    'installation': "https://media.istockphoto.com/id/114338035/photo/solar-panel-installation.jpg?s=612x612&w=0&k=20&c=P3K0opLbTHWjGYS5FUg6wHKcJEDW4WoXWmy2WRM_4-o=",
-  };
-  const imgUrl = images[cat];
-  if (imgUrl) return `<img class="cat-icon-img" src="${imgUrl}" alt="${cat.replace('-',' ').toUpperCase()} products">`; 
-  return `<svg viewBox="0 0 60 60" fill="none" stroke="var(--teal-main)" stroke-width="2"><rect x="5" y="14" width="50" height="32" rx="3"/><line x1="20" y1="14" x2="20" y2="46"/><line x1="40" y1="14" x2="40" y2="46"/><line x1="5" y1="30" x2="55" y2="30"/></svg>`;
-}
-
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
 function formatPrice(p) {
-  if (!p) return '';
+  if (typeof p !== 'number' || isNaN(p)) return 'Rs. 0';
   return 'Rs. ' + parseInt(p).toLocaleString('en-PK');
 }
 
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.background = isError ? 'var(--danger)' : 'var(--green)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function getCatImgUrl(cat) {
+  const imgs = {
+    'solar-panels':  'https://kamalsolar.pk/cdn/shop/files/Frame_163_1_470x.png?v=1737531040',
+    'inverters':     'https://kamalsolar.pk/cdn/shop/files/Frame_168_1_1_510x.png?v=1737897746',
+    'batteries':     'https://kamalsolar.pk/cdn/shop/files/Frame_166_510x.png?v=1737531157',
+    'generators':    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTe1su4sWHdNxErXMXf58F9GM6DuDO3i-Gwww&s',
+    'ups':           'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmLbE2eXRaVSg1V3uSExitxNozrtSQZmacqw&s',
+    'water-pumps':   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwNSNqd3HvUNyb_sxvdXLiwlTREaSquRNu2g&s',
+    'cables-wires':  'https://i.pinimg.com/1200x/80/45/5c/80455c96663bad43888053dacda9d59b.jpg',
+    'installation':  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTARb6fQzuAu7R0tI7_37fD3c-VPNIZsoyMBA&s'
+  };
+  return imgs[cat] || '';
+}
+
+function getCatFallbackHtml(cat) {
+  const url = getCatImgUrl(cat);
+  if (url) return `<img src="${url}" alt="${cat}" style="width:100%;height:100%;object-fit:contain;">`;
+  return `<svg viewBox="0 0 60 60" fill="none" stroke="var(--teal-main)" stroke-width="2"><rect x="5" y="14" width="50" height="32" rx="3"/></svg>`;
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
 function renderCarouselProductCard(p) {
-  const onClickAction = p.cat === 'installation' ? `window.navigate('services')` : `window.navigate('product', ${p.id})`;
-  return `
-    <div class="cat-prod-card" onclick="${onClickAction}"> 
-      <img src="${p.img ? p.img : getCatImageHtml(p.cat)}" alt="${p.name}" class="cat-prod-img" loading="lazy" decoding="async"> 
-      <div class="cat-prod-name">${p.name}</div> 
-      <div style="margin-top:auto;"> 
-        ${p.oldPrice ? `<div style="text-decoration:line-through; color:var(--gray-mid); font-size:0.8rem;">${formatPrice(p.oldPrice)}</div>` : ''}
-        <div class="cat-prod-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div>
-      </div>
+  const action = p.cat === 'installation' ? `window.navigate('services')` : `window.navigate('product',${p.id})`;
+  return `<div class="cat-prod-card" onclick="${action}">
+    <img src="${p.img || getCatImgUrl(p.cat)}" alt="${p.name}" class="cat-prod-img" loading="lazy">
+    <div class="cat-prod-name">${p.name}</div>
+    <div style="margin-top:auto;">
+      ${p.oldPrice ? `<div style="text-decoration:line-through;color:var(--gray-mid);font-size:0.8rem;">${formatPrice(p.oldPrice)}</div>` : ''}
+      <div class="cat-prod-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div>
     </div>
-  `;
+  </div>`;
 }
 
 function renderProductCard(p) {
   if (p.isService) return '';
   const inCart = cart.find(c => c.id === p.id);
-  return `
-    <div class="product-card" onclick="window.navigate('product', ${p.id})"> 
-      <div class="product-img"> 
-        ${p.img ? `<img src="${p.img}" alt="${p.name} from ZM Solar & Electric" loading="lazy" decoding="async">` : getCatImageHtml(p.cat)} 
-        ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''} 
-        ${p.oldPrice ? `<div style="position:absolute; top:12px; right:12px; background:var(--danger); color:white; font-size:0.7rem; font-weight:bold; padding:4px 8px; border-radius:100px;">Sale</div>` : ''} 
-      </div> 
-      <div class="product-body"> 
-        <div class="product-cat">${p.catLabel}</div> 
-        <div class="product-name">${p.name}</div> 
-        <div class="product-desc" style="height:35px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${p.desc || ''}</div> 
-        <div class="product-footer" style="margin-top:10px;"> 
-          <div> 
-            ${p.oldPrice ? `<div style="text-decoration:line-through; color:var(--gray-mid); font-size:0.8rem;">${formatPrice(p.oldPrice)}</div>` : ''}
-            <div class="product-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div>
-          </div>
-          <button class="add-cart-btn ${inCart?'added':''}" onclick="event.stopPropagation();window.addToCart(${p.id})">
-            ${inCart ? '✓ Added' : 'Add to Cart'}
-          </button>
+  return `<div class="product-card" onclick="window.navigate('product',${p.id})">
+    <div class="product-img">
+      ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : getCatFallbackHtml(p.cat)}
+      ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+      ${p.oldPrice ? `<div style="position:absolute;top:12px;right:12px;background:var(--danger);color:white;font-size:0.7rem;font-weight:bold;padding:4px 8px;border-radius:100px;">Sale</div>` : ''}
+    </div>
+    <div class="product-body">
+      <div class="product-cat">${p.catLabel}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-desc" style="height:35px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${p.desc || ''}</div>
+      <div class="product-footer" style="margin-top:10px;">
+        <div>
+          ${p.oldPrice ? `<div style="text-decoration:line-through;color:var(--gray-mid);font-size:0.8rem;">${formatPrice(p.oldPrice)}</div>` : ''}
+          <div class="product-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div>
         </div>
+        <button class="add-cart-btn ${inCart ? 'added' : ''}" onclick="event.stopPropagation();window.addToCart(${p.id})">
+          ${inCart ? '✓ Added' : 'Add to Cart'}
+        </button>
       </div>
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function renderCategoryShowcase() {
   const container = document.getElementById('cat-showcase-container');
+  if (!container) return;
+
   const displayCategories = [
-    { id: 'solar-panels',  name: 'Solar Panels',          img: 'https://kamalsolar.pk/cdn/shop/files/Frame_163_1_470x.png?v=1737531040' },
-    { id: 'inverters',     name: 'Inverters',              img: 'https://kamalsolar.pk/cdn/shop/files/Frame_168_1_1_510x.png?v=1737897746' },
-    { id: 'batteries',     name: 'Batteries',              img: 'https://kamalsolar.pk/cdn/shop/files/Frame_166_510x.png?v=1737531157' },
-    { id: 'generators',    name: 'Generators',             img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTe1su4sWHdNxErXMXf58F9GM6DuDO3i-Gwww&s' },
-    { id: 'ups',           name: 'UPS Systems',            img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmLbE2eXRaVSg1V3uSExitxNozrtSQZmacqw&s' },
-    { id: 'water-pumps',   name: 'Water Pumps',            img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwNSNqd3HvUNyb_sxvdXLiwlTREaSquRNu2g&s' },
-    { id: 'cables-wires',  name: 'Cables & Wires',         img: 'https://i.pinimg.com/1200x/80/45/5c/80455c96663bad43888053dacda9d59b.jpg' },
-    { id: 'installation',  name: 'Installation Services',  img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTARb6fQzuAu7R0tI7_37fD3c-VPNIZsoyMBA&s' }
+    { id: 'solar-panels',  name: 'Solar Panels',         img: getCatImgUrl('solar-panels')  },
+    { id: 'inverters',     name: 'Inverters',             img: getCatImgUrl('inverters')     },
+    { id: 'batteries',     name: 'Batteries',             img: getCatImgUrl('batteries')     },
+    { id: 'generators',    name: 'Generators',            img: getCatImgUrl('generators')    },
+    { id: 'ups',           name: 'UPS Systems',           img: getCatImgUrl('ups')           },
+    { id: 'water-pumps',   name: 'Water Pumps',           img: getCatImgUrl('water-pumps')   },
+    { id: 'cables-wires',  name: 'Cables & Wires',        img: getCatImgUrl('cables-wires')  },
+    { id: 'installation',  name: 'Installation Services', img: getCatImgUrl('installation')  }
   ];
 
   let html = '';
   displayCategories.forEach(cat => {
     const catProducts = window.allProducts.filter(p => p.cat === cat.id);
     let displayProds = [...catProducts];
-    if (displayProds.length > 0) {
-      while (displayProds.length < 4) { displayProds = displayProds.concat(catProducts); }
-      displayProds = displayProds.slice(0, 4); 
-      const loopProds = [...displayProds, ...displayProds]; 
-
-      let productsHtml = loopProds.map(p => renderCarouselProductCard(p)).join('');
-      const leftClickAction = cat.id === 'installation' ? `window.navigate('services')` : `window.navigate('cat','${cat.id}')`;
-      html += `
-        <div class="cat-showcase-row">
-          <div class="cat-showcase-left" onclick="${leftClickAction}">
-            <img src="${cat.img}" alt="${cat.name} in Lahore" loading="lazy"> 
-            <div class="cat-showcase-overlay">
-              <h3 class="cat-showcase-title">${cat.name}</h3>
-              <div class="cat-showcase-link">View All Products <span>→</span></div>
-            </div>
+    if (displayProds.length === 0) return;
+    while (displayProds.length < 4) displayProds = displayProds.concat(catProducts);
+    displayProds = displayProds.slice(0, 4);
+    const loopProds = [...displayProds, ...displayProds];
+    const productsHtml = loopProds.map(p => renderCarouselProductCard(p)).join('');
+    const leftAction = cat.id === 'installation' ? `window.navigate('services')` : `window.navigate('cat','${cat.id}')`;
+    html += `
+      <div class="cat-showcase-row">
+        <div class="cat-showcase-left" onclick="${leftAction}">
+          <img src="${cat.img}" alt="${cat.name} in Lahore" loading="lazy">
+          <div class="cat-showcase-overlay">
+            <h3 class="cat-showcase-title">${cat.name}</h3>
+            <div class="cat-showcase-link">View All <span>→</span></div>
           </div>
-          <div class="cat-showcase-right"><div class="carousel-track">${productsHtml}</div></div>
         </div>
-      `;
-    }
+        <div class="cat-showcase-right"><div class="carousel-track">${productsHtml}</div></div>
+      </div>`;
   });
   container.innerHTML = html;
 }
 
-function updateFullCalcDisplay() {
-  const billInput = document.getElementById('full-calc-bill');
-  const unitsInput = document.getElementById('full-calc-units');
-  fullCalcState.avgBill = parseInt(billInput.value) || 0;
-  fullCalcState.avgUnits = parseInt(unitsInput.value) || 0;
-  billInput.value = fullCalcState.avgBill;
-  unitsInput.value = fullCalcState.avgUnits;
-}
-
-window.updateApplianceQty = function(applianceId, delta) {
-  const inputElement = document.getElementById(applianceId);
-  let currentQty = parseInt(inputElement.value) || 0;
-  currentQty = Math.max(0, currentQty + delta);
-  inputElement.value = currentQty;
-  fullCalcState.appliances[applianceId] = currentQty;
-  calculateTotalLoad();
-};
-
-function calculateTotalLoad() {
-  let totalKw = 0;
-  for (const applianceId in fullCalcState.appliances) {
-    totalKw += fullCalcState.appliances[applianceId] * appliancePower[applianceId];
-  }
-  fullCalcState.totalLoadKw = totalKw;
-  document.getElementById('total-load-kw').textContent = totalKw.toFixed(1);
-}
-
-window.requestFullQuote = function() {
-  const meterType = document.querySelector('input[name="meter-type"]:checked').value;
-  const avgBill = parseInt(document.getElementById('full-calc-bill').value) || 0;
-  const avgUnits = parseInt(document.getElementById('full-calc-units').value) || 0;
-  const fullName = document.getElementById('full-calc-name').value;
-  const phone = document.getElementById('full-calc-phone').value;
-  const email = document.getElementById('full-calc-email').value;
-  const houseArea = document.getElementById('full-calc-area').value;
-  const address = document.getElementById('full-calc-address').value;
-
-  if (!fullName || !phone || !address || avgBill === 0 || avgUnits === 0) {
-    alert("Please fill in all required billing and contact information.");
-    return;
-  }
-
-  const isHybrid = confirm("Do you need battery backup for night time or load shedding (Hybrid System)? Click OK for Yes, Cancel for No (On-Grid System).");
-  if (isHybrid === null) {
-    return; 
-  }
-
-  let systemSizeKw = fullCalcState.totalLoadKw > 0 ? fullCalcState.totalLoadKw : Math.ceil(avgUnits / 120);
-  const standardSystemSizes = [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
-  let closestSize = standardSystemSizes[0];
-  for (const size of standardSystemSizes) {
-    if (systemSizeKw <= size) { closestSize = size; break; }
-    closestSize = size;
-  }
-  systemSizeKw = closestSize;
-
-  const panelsCount = Math.ceil((systemSizeKw * 1000) / 550);
-  const panelsPrice = panelsCount * 18500;
-  const stdInvPrice = systemSizeKw * 22000;
-  let stdBatPrice = 0, stdBatText = '';
-
-  if (isHybrid) {
-    const batteryCapacityKwh = Math.ceil(systemSizeKw * 0.75);
-    const numAgmBatteries = Math.ceil(batteryCapacityKwh / 2.4);
-    stdBatPrice = numAgmBatteries * 28000;
-    stdBatText = `${numAgmBatteries}x 200Ah Deep Cycle AGM Batteries`;
-  }
-  const bosPrice = systemSizeKw * 15000;
-  const pkg1Total = panelsPrice + stdInvPrice + stdBatPrice + bosPrice;
-
-  let waMsg = `*✨ NEW SOLAR QUOTE REQUEST ✨*\n\n`;
-  waMsg += `*👤 CUSTOMER INFO*\n`;
-  waMsg += `*Name:* ${fullName}\n`;
-  waMsg += `*Phone:* ${phone}\n`;
-  waMsg += `*Email:* ${email ? email : 'Not Provided'}\n`;
-  waMsg += `*Address:* ${address}\n`;
-  waMsg += `*House Area:* ${houseArea ? houseArea + ' Marla' : 'Not Provided'}\n\n`;
-
-  waMsg += `*📄 BILLING INFO*\n`;
-  waMsg += `*Meter Type:* ${meterType === 'single-phase' ? 'Single Phase' : 'Three Phase'}\n`;
-  waMsg += `*Monthly Bill:* Rs. ${avgBill.toLocaleString('en-PK')}\n`;
-  waMsg += `*Monthly Units:* ${avgUnits}\n\n`;
-
-  waMsg += `*🔌 LOAD DETAILS (Total: ${fullCalcState.totalLoadKw.toFixed(1)} kW)*\n`;
-  let hasLoad = false;
-  for (const [app, qty] of Object.entries(fullCalcState.appliances)) {
-    if (qty > 0) {
-      let appName = app.replace(/-/g, ' ').toUpperCase();
-      waMsg += `▪ ${appName}: ${qty}\n`;
-      hasLoad = true;
-    }
-  }
-  if (!hasLoad) waMsg += `▪ No specific load entered.\n`;
-
-  waMsg += `\n*📦 RECOMMENDED SYSTEM FOR CUSTOMER*\n`;
-  waMsg += `*System Size:* ${systemSizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'}\n`;
-  waMsg += `*Solar Panels:* ${panelsCount}x 550W\n`;
-  waMsg += `*Inverter:* 1x ${systemSizeKw}kW\n`;
-  if (isHybrid) {
-    waMsg += `*Batteries:* ${stdBatText}\n`;
-  }
-  waMsg += `*Estimated Cost:* ${formatPrice(pkg1Total)}\n`;
-
-  let encodedWaMsg = encodeURIComponent(waMsg);
-  let adminWhatsAppNumber = "923186261945";
-
-  const resultsHtml = `
-    <div class="package-card"> 
-      <div> 
-        <div class="section-tag">${systemSizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'} System</div> 
-        <h3 class="pkg-title">Custom Recommended Package</h3> 
-        <p style="color:var(--gray-mid); font-size:0.9rem;">Estimated Monthly Generation: ${systemSizeKw * 120} Units</p> 
-        <ul class="pkg-items"> 
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> ${panelsCount}x 550W Tier-1 Solar Panels</li> 
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 1x ${systemSizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'} Inverter</li> 
-          ${isHybrid ? `<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> ${stdBatText}</li>` : ''} 
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Complete Installation & Wiring</li>
-        </ul>
-      </div>
-      <div class="pkg-price-box">
-        <div style="font-size:0.85rem; font-weight:700; color:var(--gray-mid);">Estimated Cost</div>
-        <div class="pkg-total">${formatPrice(pkg1Total)}</div>
-        <a href="https://wa.me/${adminWhatsAppNumber}?text=${encodedWaMsg}" target="_blank" class="wa-animated-btn" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; padding: 14px; text-decoration:none;">Send Details on WhatsApp</a>
-      </div>
-    </div>`;
-
-  document.getElementById('full-packages-container').innerHTML = resultsHtml;
-  document.getElementById('full-calc-results').style.display = 'block';
-  document.getElementById('full-calc-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  let safeLoadDetails = {};
-  for (let key in fullCalcState.appliances) {
-    let safeKey = key.replace(/\./g, '_'); 
-    safeLoadDetails[safeKey] = fullCalcState.appliances[key];
-  }
-
-  (async function sendDataToFirebase() {
-    let billFileUrl = null;
-    const billFileInput = document.getElementById('full-calc-bill-upload');
-
-    if (billFileInput && billFileInput.files.length > 0) {
-        try {
-            const file = billFileInput.files[0];
-            const storageRef = storage.ref(`quotes/bills/${Date.now()}_${file.name}`);
-            const uploadTask = await storageRef.put(file);
-            billFileUrl = await uploadTask.ref.getDownloadURL();
-        } catch (e) {
-            console.error("Image upload failed:", e);
-        }
-    }
-
-    const quoteData = {
-        customer: { name: fullName, phone: phone, email: email, address: address, houseArea: houseArea },
-        billing: { meterType: meterType, avgBill: avgBill, avgUnits: avgUnits, billImageUrl: billFileUrl || "" },
-        loadDetails: safeLoadDetails, 
-        calculatedSystem: { 
-            sizeKw: systemSizeKw, 
-            type: isHybrid ? 'Hybrid' : 'On-Grid', 
-            estimatedCost: pkg1Total 
-        },
-        date: new Date().toLocaleString(),
-        status: "New Request"
-    };
-
-    try {
-        db.ref('quotes').push(quoteData); 
-        console.log("Data successfully sent to Admin Panel!");
-    } catch (err) {
-        console.error("Firebase Database Error:", err);
-    }
-  })();
-};
-
-window.navigate = function(page, param = null) {
-  if (currentPage === page && currentCat === param) return;
-
-  let canonicalUrl = `https://zmsolarelectric.com`; 
-  const basePath = "https://zmsolarelectric.com"; 
-
-  if (page === 'products') {
-    canonicalUrl = `${basePath}/?page=products`;
-  } else if (page === 'cat' && param) {
-    canonicalUrl = `${basePath}/?page=cat&param=${param}`;
-  } else if (page === 'product' && param) {
-    canonicalUrl = `${basePath}/?page=product&param=${param}`;
-  } else if (page === 'services') {
-    canonicalUrl = `${basePath}/?page=services`;
-  } else if (page === 'about') {
-    canonicalUrl = `${basePath}/?page=about`;
-  } else if (page === 'contact') {
-    canonicalUrl = `${basePath}/?page=contact`;
-  } else if (page === 'full-calculator') {
-    canonicalUrl = `${basePath}/?page=full-calculator`;
-  }
-
-  document.querySelector('link[rel="canonical"]').setAttribute('href', canonicalUrl);
-
-  history.pushState({ page, param }, "", `?page=${page}${param ? `&param=${param}` : ""}`);
-  applyRoute(page, param);
-};
-
-function applyRoute(page, param) {
-  previousPage = currentPage;
-  currentPage = page;
-  currentCat = param;
-  window.scrollTo({top: 0, behavior: 'smooth'});
-
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-
-  const navHome = document.getElementById('nav-home');
-  const navCalc = document.getElementById('nav-calc');
-  if (navHome) navHome.classList.remove('active');
-  if (navCalc) navCalc.classList.remove('active');
-
-  if (page === 'home') {
-    document.getElementById('page-home').classList.add('active');
-    if (navHome) navHome.classList.add('active');
-    renderCategoryShowcase();
-    renderFeaturedProducts();
-  } else if (page === 'products') {
-    document.getElementById('page-products').classList.add('active');
-    renderAllProducts();
-  } else if (page === 'cat') {
-    document.getElementById('page-cat').classList.add('active');
-    renderCategoryPage(param);
-  } else if (page === 'product') {
-    document.getElementById('page-product').classList.add('active');
-    renderProductDetail(param);
-  } else if (page === 'cart') {
-    document.getElementById('page-cart').classList.add('active');
-    renderCart();
-  } else if (page === 'checkout') {
-    document.getElementById('page-checkout').classList.add('active');
-    renderCheckoutSummary();
-    window.togglePaymentDetails();
-  } else if (page === 'success') {
-    document.getElementById('page-success').classList.add('active');
-  } else if (page === 'about') {
-    document.getElementById('page-about').classList.add('active');
-  } else if (page === 'contact') {
-    document.getElementById('page-contact').classList.add('active');
-  } else if (page === 'services') {
-    document.getElementById('page-services').classList.add('active');
-  } else if (page === 'full-calculator') {
-    document.getElementById('page-full-calculator').classList.add('active');
-    if (navCalc) navCalc.classList.add('active');
-    document.getElementById('full-calc-results').style.display = 'none';
-  }
-}
-
-window.goBack = function() { history.back(); }
-
-window.addEventListener('popstate', function(e) {
-  let canonicalUrl = `https://zmsolarelectric.com`;
-  const basePath = "https://zmsolarelectric.com"; 
-
-  if (e.state && e.state.page) {
-    if (e.state.page === 'products') {
-      canonicalUrl = `${basePath}/?page=products`;
-    } else if (e.state.page === 'cat' && e.state.param) {
-      canonicalUrl = `${basePath}/?page=cat&param=${e.state.param}`;
-    } else if (e.state.page === 'product' && e.state.param) {
-      canonicalUrl = `${basePath}/?page=product&param=${e.state.param}`;
-    } else if (e.state.page === 'services') {
-      canonicalUrl = `${basePath}/?page=services`;
-    } else if (e.state.page === 'about') {
-      canonicalUrl = `${basePath}/?page=about`;
-    } else if (e.state.page === 'contact') {
-      canonicalUrl = `${basePath}/?page=contact`;
-    } else if (e.state.page === 'full-calculator') {
-      canonicalUrl = `${basePath}/?page=full-calculator`;
-    }
-  }
-  document.querySelector('link[rel="canonical"]').setAttribute('href', canonicalUrl);
-
-  if (e.state && e.state.page) { applyRoute(e.state.page, e.state.param); }
-  else { applyRoute('home', null); }
-});
-
 function renderFeaturedProducts() {
-  const realProducts = window.allProducts.filter(p => !p.isService);
-  const featured = realProducts.slice(0, 4);
-  document.getElementById('featured-products').innerHTML = featured.map(renderProductCard).join('');
+  const el = document.getElementById('featured-products');
+  if (!el) return;
+  el.innerHTML = window.allProducts.filter(p => !p.isService).slice(0, 4).map(renderProductCard).join('');
 }
 
 function renderAllProducts() {
   const grid = document.getElementById('all-products-grid');
-  const realProducts = window.allProducts.filter(p => !p.isService);
-  grid.innerHTML = realProducts.map(renderProductCard).join('');
-  document.getElementById('prod-count').textContent = realProducts.length;
+  const real = window.allProducts.filter(p => !p.isService);
+  if (grid) grid.innerHTML = real.map(renderProductCard).join('');
+  const cnt = document.getElementById('prod-count');
+  if (cnt) cnt.textContent = real.length;
 }
 
-function renderCategoryPage(catSlug) {
-  const catNames = {
-    'solar-panels': ['Solar Panels in Lahore', 'High-efficiency mono & poly panels from top international brands for Lahore'], 
-    'inverters': ['Inverters in Lahore', 'On-grid, off-grid, and hybrid inverters for every system size in Lahore'], 
-    'batteries': ['Batteries for Solar in Lahore', 'Lithium, AGM, and Gel batteries for solar storage solutions in Lahore'], 
-    'generators': ['Generators in Lahore', 'Reliable petrol and diesel generators for backup power needs in Lahore'], 
-    'ups': ['UPS Systems in Lahore', 'Uninterruptible power supply for homes and businesses in Lahore'], 
-    'water-pumps': ['Solar Water Pumps in Lahore', 'DC solar pumps for agriculture and domestic water supply in Lahore'], 
-    'cables-wires': ['Solar Cables & Wires in Lahore', 'High-quality wires and cables for solar and electrical installations in Lahore'], 
-    'installation': ['Solar Installation Services Lahore', 'Expert solar system installation services across Lahore'], 
+function renderCategoryPage(slug) {
+  const names = {
+    'solar-panels':  ['Solar Panels in Lahore',          'High-efficiency mono & poly panels from top brands'],
+    'inverters':     ['Inverters in Lahore',              'On-grid, off-grid, and hybrid inverters for every system'],
+    'batteries':     ['Batteries for Solar in Lahore',   'Lithium, AGM, and Gel batteries for solar storage'],
+    'generators':    ['Generators in Lahore',             'Reliable petrol and diesel generators'],
+    'ups':           ['UPS Systems in Lahore',            'Uninterruptible power supply for homes & businesses'],
+    'water-pumps':   ['Solar Water Pumps in Lahore',     'DC solar pumps for agriculture and domestic use'],
+    'cables-wires':  ['Cables & Wires in Lahore',        'High-quality wires for solar and electrical installations'],
+    'installation':  ['Solar Installation Services',      'Expert solar installation across Lahore']
   };
-  const [title, sub] = catNames[catSlug] || ['Products', ''];
-  document.getElementById('cat-page-title').textContent = title;
-  document.getElementById('cat-page-sub').textContent = sub;
-  document.getElementById('cat-breadcrumb').textContent = title;
-  const filtered = window.allProducts.filter(p => p.cat === catSlug && !p.isService);
-  document.getElementById('cat-products-grid').innerHTML = filtered.length
-  ? filtered.map(renderProductCard).join('')
-  : `<div class="empty-state"><h3>No products in this category yet</h3></div>`;
+  const [title, sub] = names[slug] || ['Products', 'Browse our range'];
+  const titleEl = document.getElementById('cat-page-title');
+  const subEl   = document.getElementById('cat-page-sub');
+  const bcEl    = document.getElementById('cat-breadcrumb');
+  const gridEl  = document.getElementById('cat-products-grid');
+  if (titleEl) titleEl.textContent = title;
+  if (subEl)   subEl.textContent   = sub;
+  if (bcEl)    bcEl.textContent    = title;
+  const filtered = window.allProducts.filter(p => p.cat === slug && !p.isService);
+  if (gridEl)  gridEl.innerHTML = filtered.length
+    ? filtered.map(renderProductCard).join('')
+    : '<div class="empty-state"><h3>No products in this category yet</h3></div>';
 }
 
 function renderProductDetail(id) {
   currentProductId = id;
+  pdpQty = 1;
   const p = window.allProducts.find(x => x.id == id);
   if (!p) return;
 
   const inCart = cart.find(c => c.id === p.id);
 
-  let specsHTML = '';
-  if (p.specs) {
-    specsHTML = Object.entries(p.specs).map(([k,v]) =>
-      `<div class="pdp-spec-row"><span class="key">${k}</span><span class="val">${v}</span></div>`
-    ).join('');
-  }
+  const specsHTML = p.specs
+    ? Object.entries(p.specs).map(([k, v]) => `<div class="pdp-spec-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('')
+    : '';
 
-  document.getElementById('pdp-breadcrumb').innerHTML = `<span onclick="window.navigate('home')">Home</span><span class="sep">›</span> <span onclick="window.navigate('cat','${p.cat}')">${p.catLabel}</span><span class="sep">›</span> <span>${p.name}</span>`;
+  const bcEl = document.getElementById('pdp-breadcrumb');
+  if (bcEl) bcEl.innerHTML = `<span onclick="window.navigate('home')">Home</span><span class="sep">›</span><span onclick="window.navigate('cat','${p.cat}')">${p.catLabel}</span><span class="sep">›</span><span>${p.name}</span>`;
 
-  let brochureHtml = '';
-  if (p.pdfLink) {
-    brochureHtml = `
-      <div style="margin-top: 30px; padding: 20px; border: 1.5px solid var(--teal-fade); border-radius: 16px; background: var(--teal-pale);"> 
-        <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 16px;"> 
-          <div style="width:40px; height:40px; background:white; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#ef4444;"> 
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> 
-          </div> 
-          <div> 
-            <div style="font-weight:700; font-size:1rem; color:var(--text-dark);">Product Datasheet</div> 
-            <div style="font-size:0.8rem; color:var(--gray-mid);">PDF Document</div> 
-          </div> 
-        </div> 
-        <div style="display:flex; gap:12px;"> 
-          <a href="${p.pdfLink}" target="_blank" style="flex:1; text-align:center; padding:10px 15px; border-radius:10px; background:white; border:2px solid var(--teal-main); color:var(--teal-main); font-weight:700; text-decoration:none; font-size:0.9rem; transition:0.2s;">👁️ View Brochure</a> 
-          <a href="${p.pdfLink}" download target="_blank" style="flex:1; text-align:center; padding:10px 15px; border-radius:10px; background:var(--teal-main); color:white; font-weight:700; text-decoration:none; border:none; font-size:0.9rem; transition:0.2s;">⬇️ Download</a> 
-        </div> 
-      </div>`;
-  }
+  const brochureHtml = p.pdfLink ? `
+    <div style="margin-top:30px;padding:20px;border:1.5px solid var(--teal-fade);border-radius:16px;background:var(--teal-pale);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#ef4444;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>
+        </div>
+        <div><div style="font-weight:700;font-size:1rem;color:var(--text-dark);">Product Datasheet</div><div style="font-size:0.8rem;color:var(--gray-mid);">PDF Document</div></div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <a href="${p.pdfLink}" target="_blank" style="flex:1;text-align:center;padding:10px 15px;border-radius:10px;background:white;border:2px solid var(--teal-main);color:var(--teal-main);font-weight:700;text-decoration:none;font-size:0.9rem;">👁️ View Brochure</a>
+        <a href="${p.pdfLink}" download target="_blank" style="flex:1;text-align:center;padding:10px 15px;border-radius:10px;background:var(--teal-main);color:white;font-weight:700;text-decoration:none;font-size:0.9rem;">⬇️ Download</a>
+      </div>
+    </div>` : '';
 
-  document.getElementById('pdp-content').innerHTML = `
-    <div> 
-      <div class="pdp-img-main"><img src="${p.img || getCatImageHtml(p.cat)}" alt="${p.name} price in Lahore" style="max-width:90%;max-height:90%;object-fit:contain;"></div>
-    </div> 
-    <div class="pdp-content"> 
-      <div class="product-cat">${p.catLabel}</div> 
-      <h1>${p.name}</h1> 
-      <div class="pdp-price-box"> 
-        <div style="display:flex; align-items:baseline; gap:12px;"> 
-          <div class="pdp-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div> 
-          ${p.oldPrice ? `<div style="text-decoration:line-through; color:var(--gray-mid); font-size:1.2rem;">${formatPrice(p.oldPrice)}</div>` : ''}
+  const pdpEl = document.getElementById('pdp-content');
+  if (pdpEl) pdpEl.innerHTML = `
+    <div>
+      <div class="pdp-img-main"><img src="${p.img || getCatImgUrl(p.cat)}" alt="${p.name}" style="max-width:90%;max-height:90%;object-fit:contain;"></div>
+    </div>
+    <div class="pdp-content">
+      <div class="product-cat">${p.catLabel}</div>
+      <h1>${p.name}</h1>
+      <div class="pdp-price-box">
+        <div style="display:flex;align-items:baseline;gap:12px;">
+          <div class="pdp-price" style="${p.oldPrice ? 'color:var(--danger);' : ''}">${formatPrice(p.price)}</div>
+          ${p.oldPrice ? `<div style="text-decoration:line-through;color:var(--gray-mid);font-size:1.2rem;">${formatPrice(p.oldPrice)}</div>` : ''}
         </div>
         <div class="pdp-price-note">✓ GST Included | ✓ Free Delivery in Lahore</div>
       </div>
@@ -3911,399 +4169,675 @@ function renderProductDetail(id) {
         </button>
       </div>
       <div style="margin-top:20px;display:flex;gap:16px;font-size:0.83rem;color:var(--gray-mid);">
-        <span>🚚 Free delivery Lahore</span>
-        <span>✓ Genuine product</span>
-        <span>🔧 Installation available</span>
+        <span>🚚 Free delivery Lahore</span><span>✓ Genuine product</span><span>🔧 Installation available</span>
       </div>
       ${brochureHtml}
     </div>`;
 
-  const related = window.allProducts.filter(x => x.cat === p.cat && x.id !== p.id && !x.isService).slice(0,4);
-  document.getElementById('related-products').innerHTML = related.map(renderProductCard).join('');
-}
-
-let pdpQty = 1;
-window.changeQty = function(d) {
-  pdpQty = Math.max(1, pdpQty + d);
-  const el = document.getElementById('pdp-qty');
-  if (el) el.textContent = pdpQty;
-}
-
-window.addToCart = function(id) {
-  const p = window.allProducts.find(x => x.id == id);
-  if (!p) return;
-  const existing = cart.find(c => c.id == id);
-  if (existing) existing.qty += pdpQty;
-  else cart.push({ ...p, qty: pdpQty });
-  pdpQty = 1; 
-
-  updateCartCount();
-  showToast('✓ ' + p.name.substring(0,30) + '... added!');
-
-  document.querySelectorAll('.add-cart-btn').forEach(btn => {
-    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(id)) {
-      btn.textContent = '✓ Added';
-      btn.classList.add('added');
-    }
-  });
-
-  const pdpBtn = document.getElementById('pdp-cart-btn');
-  if (pdpBtn && currentProductId == id) { pdpBtn.textContent = '✓ Already in Cart'; }
-}
-
-function updateCartCount() {
-  document.getElementById('cart-count').textContent = cart.reduce((s, c) => s + c.qty, 0);
-}
-
-function showToast(msg, isError = false) { 
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.backgroundColor = isError ? 'var(--danger)' : 'var(--green)'; 
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  const relEl = document.getElementById('related-products');
+  if (relEl) {
+    const related = window.allProducts.filter(x => x.cat === p.cat && x.id !== p.id && !x.isService).slice(0, 4);
+    relEl.innerHTML = related.map(renderProductCard).join('');
+  }
 }
 
 function renderCart() {
   const container = document.getElementById('cart-items-container');
-  const summary = document.getElementById('cart-summary-items');
+  const summaryBox = document.getElementById('cart-summary-items');
+  if (!container) return;
 
   if (cart.length === 0) {
-    container.innerHTML = `<div class="empty-state"><h3>Your cart is empty</h3><button class="btn-blue" onclick="window.navigate('products')" style="margin-top:20px;">Shop Now</button></div>`;
-    summary.innerHTML = '<p style="color:var(--gray-mid);text-align:center;padding:20px 0;">No items</p>';
+    container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><h3>Your cart is empty</h3><button class="btn-blue" onclick="window.navigate('products')" style="margin-top:20px;">Shop Now</button></div>`;
+    if (summaryBox) summaryBox.innerHTML = '';
     return;
   }
 
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const delivery = subtotal > 50000 ? 0 : 2000;
-
-  container.innerHTML = cart.map(item => `
+  container.innerHTML = cart.map((item, idx) => `
     <div class="cart-item">
-      <div class="cart-item-img"><img src="${item.img || getCatImageHtml(item.cat)}" alt="${item.name} in cart" style="max-width:80%;max-height:80%;"></div> 
+      <div class="cart-item-img"><img src="${item.img || ''}" alt="${item.name}" style="max-width:80%;max-height:80%;object-fit:contain;"></div>
       <div>
         <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-cat">${item.catLabel}</div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-          <button class="qty-btn" onclick="window.cartQty(${item.id},-1)" style="width:30px;height:30px;">−</button>
+          <button class="qty-btn" onclick="window.cartQty(${idx},-1)" style="width:30px;height:30px;">−</button>
           <span style="font-weight:700;">${item.qty}</span>
-          <button class="qty-btn" onclick="window.cartQty(${item.id},1)" style="width:30px;height:30px;">+</button>
+          <button class="qty-btn" onclick="window.cartQty(${idx},1)" style="width:30px;height:30px;">+</button>
         </div>
-        <button class="remove-btn" onclick="window.removeCart(${item.id})">Remove</button>
+        <button class="remove-btn" onclick="window.removeFromCart(${idx})">🗑 Remove</button>
       </div>
-      <div><div class="cart-item-price">${formatPrice(item.price * item.qty)}</div></div>
-    </div>
-  `).join('');
+      <div class="cart-item-price">${formatPrice(item.price * item.qty)}</div>
+    </div>`).join('');
 
-  summary.innerHTML = `
-    <div class="summary-row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div> 
-    <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? '<span style="color:var(--green)">FREE</span>' : formatPrice(delivery)}</span></div> 
-    <div class="summary-row total"><span>Total</span><span>${formatPrice(subtotal + delivery)}</span></div>
-  `;
-}
-
-window.cartQty = function(id, d) {
-  const item = cart.find(c => c.id == id);
-  if (!item) return;
-  item.qty = Math.max(1, item.qty + d);
-  updateCartCount(); renderCart();
-}
-
-window.removeCart = function(id) {
-  cart = cart.filter(c => c.id != id);
-  updateCartCount(); renderCart();
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const delivery = subtotal > 50000 ? 0 : 2000;
+  if (summaryBox) summaryBox.innerHTML = `
+    <div class="summary-row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div>
+    <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? '<span style="color:var(--green)">FREE</span>' : formatPrice(delivery)}</span></div>
+    <div class="summary-row total"><span>Total</span><span>${formatPrice(subtotal + delivery)}</span></div>`;
 }
 
 function renderCheckoutSummary() {
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const el = document.getElementById('checkout-summary');
+  if (!el) return;
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const delivery = subtotal > 50000 ? 0 : 2000;
-  document.getElementById('checkout-summary').innerHTML = `
-    ${cart.map(c => `<div class="summary-row"><span>${c.name.substring(0,25)}... ×${c.qty}</span><span>${formatPrice(c.price*c.qty)}</span></div>`).join('')}
-    <div class="summary-row" style="border-top:1px solid #E2E8F0;margin-top:8px;padding-top:10px;"><span>Delivery</span><span>${delivery===0?'FREE':formatPrice(delivery)}</span></div>
-    <div class="summary-row total"><span>Total</span><span>${formatPrice(subtotal + delivery)}</span></div>
-  `;
+  el.innerHTML = `
+    ${cart.map(c => `<div class="summary-row"><span>${c.qty}x ${c.name.substring(0,22)}...</span><span>${formatPrice(c.price*c.qty)}</span></div>`).join('')}
+    <div class="summary-row" style="border-top:1px solid #E2E8F0;margin-top:8px;padding-top:10px;"><span>Delivery</span><span>${delivery === 0 ? 'charges' : formatPrice(delivery)}</span></div>
+    <div class="summary-row total"><span>Total</span><span>${formatPrice(subtotal + delivery)}</span></div>`;
 }
 
-window.togglePaymentDetails = function() {
-  const paymentMethod = document.querySelector('input[name="pay"]:checked').value;
-  const bankDetailsBox = document.getElementById('bank-transfer-details');
-  const jazzcashDetailsBox = document.getElementById('jazzcash-easypaisa-details');
+async function renderMyOrders() {
+  const list = document.getElementById('my-orders-list');
+  if (!list) return;
 
-  bankDetailsBox.classList.remove('active');
-  jazzcashDetailsBox.classList.remove('active');
-  paymentScreenshotFile = null; 
+  if (!loggedInUser) {
+    list.innerHTML = `<div class="empty-state"><h3>Please login to see your orders</h3><button class="btn-blue" onclick="window.openAuthModal('login')">Login Now</button></div>`;
+    return;
+  }
 
-  document.getElementById('bank-iban-num').textContent = paymentInfo.bankTransfer.iban;
-  document.getElementById('jazzcash-number').textContent = paymentInfo.jazzcash.mobileNumber;
+  try {
+    const snap = await db.ref('orders').orderByChild('customer/uid').equalTo(loggedInUser.uid).once('value');
+    const orders = snap.val();
 
-  if (paymentMethod === 'Bank Transfer') {
-      bankDetailsBox.classList.add('active');
-      document.getElementById('bank-screenshot-preview').style.display = 'none'; 
-      document.getElementById('bank-screenshot-upload').value = ''; 
-  } else if (paymentMethod === 'JazzCash / EasyPaisa') {
-      jazzcashDetailsBox.classList.add('active');
-      document.getElementById('jazzcash-screenshot-preview').style.display = 'none'; 
-      document.getElementById('jazzcash-screenshot-upload').value = ''; 
+    if (!orders) { 
+      list.innerHTML = `<div class="empty-state"><h3>No orders yet</h3></div>`; 
+      return; 
+    }
+
+    list.innerHTML = Object.values(orders).reverse().map(o => {
+      // Safely access billing data
+      const bill = o.billing || {};
+      const subtotal = bill.subtotal || 0;
+      const delivery = bill.delivery || 0;
+      const total = bill.total || (subtotal + delivery);
+      const method = bill.method || "Not Specified";
+
+      return `
+      <div class="order-card" style="background:var(--primary-bg); border:1.5px solid #E2E8F0; border-radius:18px; padding:24px; margin-bottom:24px; box-shadow: var(--shadow);">
+        
+        <!-- Order Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h3 style="font-family:'Playfair Display',serif; font-size:1.3rem; margin:0;">Order #${o.orderId}</h3>
+            <span style="font-size:0.8rem; color:var(--gray-mid);">${new Date(o.timestamp).toLocaleDateString()}</span>
+          </div>
+          <span style="background:var(--teal-pale); color:var(--teal-main); padding:6px 14px; border-radius:100px; font-size:0.85rem; font-weight:700; border:1px solid var(--teal-fade);">
+            ${o.status}
+          </span>
+        </div>
+
+        <!-- Price Breakdown Box -->
+        <div style="background: var(--gray-light); border-radius:12px; padding:16px; margin-bottom:20px; border:1px solid #edf2f7;">
+          <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:8px; color:var(--gray-dark);">
+            <span>Items Subtotal:</span>
+            <span style="font-weight:600;">${formatPrice(subtotal)}</span>
+          </div>
+          
+          <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:12px; color:var(--pink-accent);">
+            <span>Delivery Charges:</span>
+            <span style="font-weight:700;">${delivery > 0 ? formatPrice(delivery) : 'Pending (Admin will update)'}</span>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:1.1rem; padding-top:12px; border-top:2px dashed #cbd5e0; color:var(--text-dark); font-weight:800;">
+            <span>Grand Total:</span>
+            <span>${formatPrice(total)}</span>
+          </div>
+          
+          <div style="margin-top:10px; font-size:0.8rem; color:var(--gray-mid);">
+            Payment Method: <strong>${method}</strong>
+          </div>
+        </div>
+
+        <!-- Items List -->
+        <div style="font-weight:700; font-size:0.9rem; color:var(--text-dark); margin-bottom:8px;">Order Items:</div>
+        <ul style="list-style:none; padding:0; margin:0;">
+          ${o.items.map(it => `
+            <li style="font-size:0.88rem; color:var(--gray-dark); padding:6px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between;">
+              <span>${it.qty}x ${it.name}</span>
+              <span>${formatPrice(it.price * it.qty)}</span>
+            </li>
+          `).join('')}
+        </ul>
+
+        <!-- WhatsApp Track Button -->
+        <a href="https://wa.me/${ADMIN_WA}?text=Assalam-o-Alaikum, I want to track my Order #${o.orderId}. My total is ${formatPrice(total)}." 
+           target="_blank" 
+           style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; background:#25D366; color:white; padding:12px; border-radius:10px; text-decoration:none; font-weight:700; font-size:0.95rem; transition:0.3s;"
+           onmouseover="this.style.background='#1da851'" onmouseout="this.style.background='#25D366'">
+          <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          Track via WhatsApp
+        </a>
+      </div>`;
+    }).join('');
+
+  } catch (e) {
+    list.innerHTML = `<p style="color:var(--danger); padding:20px; text-align:center;">Error loading orders: ${e.message}</p>`;
   }
 }
 
-window.copyToClipboard = function(elementId) {
-  const textToCopy = document.getElementById(elementId).textContent;
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    showToast('Copied to clipboard!');
-  }).catch(err => {
-    showToast('Failed to copy', true); 
-  });
+// ============================================================
+// NAVIGATION
+// ============================================================
+window.navigate = function(page, param = null) {
+  if (currentPage === page && currentCat === param) return;
+  const basePath = 'https://zmsolarelectric.com';
+  let canonical = basePath;
+  if (page !== 'home') canonical = `${basePath}/?page=${page}${param ? `&param=${param}` : ''}`;
+  const cl = document.querySelector('link[rel="canonical"]');
+  if (cl) cl.setAttribute('href', canonical);
+  history.pushState({ page, param }, '', `?page=${page}${param ? `&param=${param}` : ''}`);
+  applyRoute(page, param);
+};
+
+function applyRoute(page, param) {
+  previousPage   = currentPage;
+  currentPage    = page;
+  currentCat     = param;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navHome = document.getElementById('nav-home');
+  const navCalc = document.getElementById('nav-calc');
+  if (navHome) navHome.classList.remove('active');
+  if (navCalc) navCalc.classList.remove('active');
+
+  const pageMap = {
+    home:            () => { renderCategoryShowcase(); renderFeaturedProducts(); if (navHome) navHome.classList.add('active'); },
+    products:        () => renderAllProducts(),
+    cat:             () => renderCategoryPage(param),
+    product:         () => renderProductDetail(param),
+    cart:            () => renderCart(),
+    checkout:        () => { renderCheckoutSummary(); window.togglePaymentDetails(); prefillCheckout(); },
+    success:         () => {},
+    about:           () => {},
+    contact:         () => {},
+    services:        () => {},
+    'my-orders':     () => renderMyOrders(),
+    'full-calculator': () => {
+      if (navCalc) navCalc.classList.add('active');
+      const r = document.getElementById('full-calc-results');
+      if (r) r.style.display = 'none';
+    }
+  };
+
+  const pageId = `page-${page}`;
+  const el = document.getElementById(pageId);
+  if (el) el.classList.add('active');
+  if (pageMap[page]) pageMap[page]();
 }
+
+function prefillCheckout() {
+  if (loggedInUser && userProfile) {
+    const fill = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    fill('chk-fname', userProfile.firstName);
+    fill('chk-lname', userProfile.lastName);
+    fill('chk-phone', userProfile.phone);
+    fill('chk-email', userProfile.email || loggedInUser.email);
+    fill('chk-address', userProfile.address);
+    fill('chk-city', userProfile.city);
+    fill('chk-prov', userProfile.province);
+  }
+}
+
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.page) applyRoute(e.state.page, e.state.param);
+  else applyRoute('home', null);
+});
+
+window.goBack = () => history.back();
+
+// ============================================================
+// CART ACTIONS
+// ============================================================
+window.addToCart = function(id) {
+  const p = window.allProducts.find(x => x.id == id);
+  if (!p) return;
+  const existing = cart.find(c => c.id == id);
+  if (existing) {
+    existing.qty += (currentPage === 'product' ? pdpQty : 1);
+  } else {
+    cart.push({ ...p, qty: (currentPage === 'product' ? pdpQty : 1) });
+  }
+  pdpQty = 1;
+  updateCartCount();
+  showToast('✓ ' + p.name.substring(0, 28) + '... added!');
+  if (currentPage === 'product') renderProductDetail(id);
+  else if (currentPage === 'products') renderAllProducts();
+  else if (currentPage === 'home') { renderCategoryShowcase(); renderFeaturedProducts(); }
+};
+
+window.cartQty = function(idx, delta) {
+  if (!cart[idx]) return;
+  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+  updateCartCount();
+  renderCart();
+};
+
+window.removeFromCart = function(idx) {
+  cart.splice(idx, 1);
+  updateCartCount();
+  renderCart();
+};
+
+window.changeQty = function(delta) {
+  pdpQty = Math.max(1, pdpQty + delta);
+  const el = document.getElementById('pdp-qty');
+  if (el) el.textContent = pdpQty;
+};
+
+function updateCartCount() {
+  const el = document.getElementById('cart-count');
+  if (el) el.textContent = cart.reduce((s, c) => s + c.qty, 0);
+  try { localStorage.setItem('zmsolar_cart', JSON.stringify(cart)); } catch(e) {}
+}
+
+// ============================================================
+// PAYMENT TOGGLE
+// ============================================================
+window.togglePaymentDetails = function() {
+  const method = document.querySelector('input[name="pay"]:checked');
+  if (!method) return;
+  const bankEl = document.getElementById('bank-transfer-details');
+  const jcEl   = document.getElementById('jazzcash-easypaisa-details');
+  if (bankEl) bankEl.classList.toggle('active', method.value === 'Bank Transfer');
+  if (jcEl)   jcEl.classList.toggle('active',   method.value === 'JazzCash / EasyPaisa');
+
+  const ibanEl = document.getElementById('bank-iban-num');
+  const jcNum  = document.getElementById('jazzcash-number');
+  if (ibanEl) ibanEl.textContent = paymentInfo.bankTransfer.iban;
+  if (jcNum)  jcNum.textContent  = paymentInfo.jazzcash.mobileNumber;
+};
+
+window.copyToClipboard = function(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied!')).catch(() => showToast('Copy failed', true));
+};
 
 window.handlePaymentScreenshotUpload = function(input, type) {
   const file = input.files[0];
-  if (!file) {
-    paymentScreenshotFile = null;
-    if (type === 'bank') document.getElementById('bank-screenshot-preview').style.display = 'none';
-    if (type === 'jazzcash') document.getElementById('jazzcash-screenshot-preview').style.display = 'none';
-    return;
-  }
-
-  paymentScreenshotFile = file; 
-
+  if (!file) { paymentScreenshotFile = null; return; }
+  paymentScreenshotFile = file;
   const reader = new FileReader();
   reader.onload = (e) => {
-      if (type === 'bank') {
-          const preview = document.getElementById('bank-screenshot-preview');
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-      }
-      if (type === 'jazzcash') {
-          const preview = document.getElementById('jazzcash-screenshot-preview');
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-      }
+    const prev = document.getElementById(`${type === 'bank' ? 'bank' : 'jazzcash'}-screenshot-preview`);
+    if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
   };
   reader.readAsDataURL(file);
-}
+};
 
+// ============================================================
+// PLACE ORDER
+// ============================================================
 window.placeOrder = async function() {
-  if (cart.length === 0) {
-    alert("Your cart is empty. Please add items before placing an order.");
+   if (!loggedInUser) {
+    alert('Order place karne ke liye pehle Login karna lazmi hai.');
+    window.openAuthModal('login');
     return;
   }
-
-  const fname = document.getElementById('chk-fname').value;
-  const lname = document.getElementById('chk-lname').value;
-  const phone = document.getElementById('chk-phone').value;
-  const email = document.getElementById('chk-email').value;
+  if (cart.length === 0) { alert('Your cart is empty!'); return; }
+  const fname   = document.getElementById('chk-fname').value;
+  const lname   = document.getElementById('chk-lname').value;
+  const phone   = document.getElementById('chk-phone').value;
+  const email   = document.getElementById('chk-email').value;
   const address = document.getElementById('chk-address').value;
-  const city = document.getElementById('chk-city').value;
-  const prov = document.getElementById('chk-prov').value;
-  const payMethod = document.querySelector('input[name="pay"]:checked').value;
+  const city    = document.getElementById('chk-city').value;
+  const prov    = document.getElementById('chk-prov').value;
+  const method  = document.querySelector('input[name="pay"]:checked').value;
 
-  if (!fname || !phone || !address || !city || !prov) { 
-    alert("Please fill in all required delivery information (Name, Phone, Address, City, Province).");
-    return;
+  if (!fname || !phone || !address) { alert('Please fill required fields!'); return; }
+
+  if (method !== 'Cash on Delivery' && !paymentScreenshotFile) {
+    alert(`Please upload a payment screenshot for ${method}.`); return;
   }
 
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const delivery = subtotal > 50000 ? 0 : 2000;
-  const total = subtotal + delivery;
+  const total    = subtotal + delivery;
+  const orderId  = 'ZM-' + Math.floor(100000 + Math.random() * 900000);
 
-  let paymentDetails = {};
-  let paymentScreenshotUrl = null;
-
-  if (payMethod !== 'Cash on Delivery') {
-    if (!paymentScreenshotFile) {
-      alert(`Please upload a payment screenshot for ${payMethod} before placing your order.`);
-      return;
-    }
-
-    showToast('Uploading payment screenshot...', false);
+  let screenshotUrl = null;
+  if (paymentScreenshotFile) {
     try {
-        const storageRef = storage.ref(`payments/screenshots/${Date.now()}_${paymentScreenshotFile.name}`);
-        const uploadTask = await storageRef.put(paymentScreenshotFile);
-        paymentScreenshotUrl = await uploadTask.ref.getDownloadURL();
-        showToast('Screenshot uploaded successfully!');
-        console.log("Payment screenshot uploaded, URL:", paymentScreenshotUrl);
-    } catch (error) {
-        console.error("Error uploading payment screenshot to Firebase Storage:", error);
-        showToast("Failed to upload payment screenshot. Please try again.", true);
-        return; 
-    }
-
-    if (payMethod === 'Bank Transfer') {
-        paymentDetails = { accountHolder: paymentInfo.bankTransfer.accountHolder, bankName: paymentInfo.bankTransfer.bankName, iban: paymentInfo.bankTransfer.iban };
-    } else if (payMethod === 'JazzCash / EasyPaisa') {
-        paymentDetails = { accountHolder: paymentInfo.jazzcash.accountHolder, mobileNumber: paymentInfo.jazzcash.mobileNumber };
+      showToast('Uploading screenshot...');
+      const ref = storage.ref(`payments/screenshots/${Date.now()}_${paymentScreenshotFile.name}`);
+      await ref.put(paymentScreenshotFile);
+      screenshotUrl = await ref.getDownloadURL();
+    } catch (e) {
+      showToast('Screenshot upload failed', true); return;
     }
   }
 
   const orderData = {
-    customer: { firstName: fname, lastName: lname, phone: phone, email: email, address: address, city: city, province: prov },
-    items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, qty: item.qty })),
-    billing: { subtotal: subtotal, delivery: delivery, total: total, method: payMethod },
-    paymentDetails: paymentDetails,
-    paymentScreenshotUrl: paymentScreenshotUrl, 
-    status: "Pending", date: new Date().toLocaleString()
+    orderId,
+    customer: { firstName: fname, lastName: lname, phone, email, address, city, province: prov, uid: loggedInUser ? loggedInUser.uid : 'guest' },
+    items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+    billing: { subtotal, delivery, total, method },
+    paymentScreenshotUrl: screenshotUrl || '',
+    status: 'Pending',
+    timestamp: new Date().toISOString()
   };
 
-  console.log("Attempting to place order with data:", orderData);
-
   try {
-    showToast('Placing your order...', false);
-    await db.ref('orders').push(orderData); 
-    showToast('Order saved successfully!');
-    console.log("Order data successfully pushed to Firebase.");
+    showToast('Placing order...');
+    await db.ref('orders/' + orderId).set(orderData);
 
-    let waMsg = `*🚨 NEW ORDER RECEIVED! 🚨*\n\n`;
-    waMsg += `*👤 CUSTOMER DETAILS*\n`;
-    waMsg += `*Name:* ${fname} ${lname}\n`;
-    waMsg += `*Phone:* ${phone}\n`;
-    waMsg += `*Email:* ${email ? email : 'Not provided'}\n`;
-    waMsg += `*Address:* ${address}, ${city}, ${prov}\n\n`;
+    let waMsg = `*🚀 NEW ORDER: ${orderId}*\n\n*Customer:* ${fname} ${lname}\n*Phone:* ${phone}\n*Address:* ${address}, ${city}, ${prov}\n\n*Items:*\n`;
+    cart.forEach(i => { waMsg += `- ${i.qty}x ${i.name} = ${formatPrice(i.price * i.qty)}\n`; });
+    waMsg += `\n*Total:* ${formatPrice(total)}\n*Payment:* ${method}`;
+    if (screenshotUrl) waMsg += `\n*Screenshot:* ${screenshotUrl}`;
 
-    waMsg += `*🛒 ORDER ITEMS*\n`;
-    cart.forEach(item => { 
-        waMsg += `▪ ${item.name} (Qty: ${item.qty}) = ${formatPrice(item.price * item.qty)}\n`; 
-    });
-
-    waMsg += `\n*💳 BILLING DETAILS*\n`;
-    waMsg += `*Subtotal:* ${formatPrice(subtotal)}\n`;
-    waMsg += `*Delivery:* ${delivery === 0 ? 'FREE' : formatPrice(delivery)}\n`;
-    waMsg += `*Total Bill:* ${formatPrice(total)}\n\n`;
-
-    waMsg += `*🏦 PAYMENT METHOD*\n`;
-    waMsg += `*Method:* ${payMethod}\n`;
-    if (payMethod !== 'Cash on Delivery' && paymentScreenshotUrl) {
-        waMsg += `*Screenshot URL:* ${paymentScreenshotUrl}\n`;
-    }
-
-    waMsg += `\n*🕒 Order Date:* ${new Date().toLocaleString()}`;
-
-    let adminWhatsAppNumber = "9231862611945"; 
-    let whatsappLink = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(waMsg)}`;
-
-    const placeOrderBtn = document.querySelector('button[onclick="window.placeOrder()"]');
-    if(placeOrderBtn) placeOrderBtn.style.display = 'none';
-
-    let waBox = document.getElementById('checkout-whatsapp-box');
-    if(!waBox) {
-      waBox = document.createElement('div');
-      waBox.id = 'checkout-whatsapp-box';
-      const checkoutLayout = document.querySelector('.checkout-layout');
-      if (checkoutLayout) checkoutLayout.appendChild(waBox);
-    }
-    
-    if (waBox) {
-      waBox.style.display = 'block';
-      waBox.innerHTML = `
-        <div class="package-card" style="grid-template-columns: 1fr; margin-top: 10px; border-color: #25D366; padding: 20px;">
-          <div style="text-align: center;">
-            <div style="width:60px; height:60px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px;">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <h3 class="pkg-title" style="font-size: 1.4rem;">Order Saved Successfully!</h3>
-            <p style="color:var(--gray-dark); margin-bottom: 20px; font-size: 0.95rem;">Aapka order system mein save ho gaya hai. Confirm karne ke liye details WhatsApp par send karein.</p>
-          </div>
-          <div class="pkg-price-box" style="background: #f0fdf4;">
-            <div style="font-size:0.85rem; font-weight:700; color:var(--gray-mid);">Total Amount</div>
-            <div class="pkg-total">${formatPrice(total)}</div>
-            
-            <a href="${whatsappLink}" target="_blank" onclick="window.finalizeOrderAndRedirect()" class="wa-animated-btn" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; padding: 16px; text-decoration:none; font-size: 1rem;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              Send Details on WhatsApp
-            </a>
-          </div>
-        </div>
-      `;
-      waBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-  } catch (error) {
-    console.error("Firebase Realtime Database Error - Could not place order:", error);
-    showToast("Error placing order. Please try again.", true);
-  } finally {
+    cart = [];
+    updateCartCount();
     paymentScreenshotFile = null;
+    window.navigate('success');
+    setTimeout(() => window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}`, '_blank'), 1000);
+  } catch (e) {
+    showToast('Order failed: ' + e.message, true);
   }
+};
+
+// ============================================================
+// SOLAR CALCULATOR
+// ============================================================
+function updateFullCalcDisplay() {
+  const b = document.getElementById('full-calc-bill');
+  const u = document.getElementById('full-calc-units');
+  if (b) fullCalcState.avgBill  = parseInt(b.value)  || 0;
+  if (u) fullCalcState.avgUnits = parseInt(u.value) || 0;
 }
 
-window.finalizeOrderAndRedirect = function() {
-  cart = [];
-  updateCartCount();
-  setTimeout(() => {
-      window.navigate('success');
-  }, 1000);
+function calculateTotalLoad() {
+  let total = 0;
+  for (const id in fullCalcState.appliances) total += fullCalcState.appliances[id] * (appliancePower[id] || 0);
+  fullCalcState.totalLoadKw = total;
+  const el = document.getElementById('total-load-kw');
+  if (el) el.textContent = total.toFixed(1);
 }
 
-window.toggleMobile = function() { document.getElementById('mobile-menu').classList.toggle('open'); }
-window.closeMobileOnBg = function(e) { if (e.target === document.getElementById('mobile-menu')) window.toggleMobile(); }
+window.updateApplianceQty = function(id, delta) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let qty = Math.max(0, (parseInt(el.value) || 0) + delta);
+  el.value = qty;
+  fullCalcState.appliances[id] = qty;
+  calculateTotalLoad();
+};
 
+window.requestFullQuote = async function() {
+  const avgBill  = parseInt(document.getElementById('full-calc-bill').value)  || 0;
+  const avgUnits = parseInt(document.getElementById('full-calc-units').value) || 0;
+  const fullName = document.getElementById('full-calc-name').value.trim();
+  const phone    = document.getElementById('full-calc-phone').value.trim();
+  const address  = document.getElementById('full-calc-address').value.trim();
+  const email    = document.getElementById('full-calc-email').value.trim();
+  const houseArea= document.getElementById('full-calc-area').value.trim();
+  const meterType= document.querySelector('input[name="meter-type"]:checked').value;
+
+  if (!fullName || !phone || !address || avgBill === 0 || avgUnits === 0) {
+    alert('Please fill all required fields.'); return;
+  }
+
+  const isHybrid = confirm('Do you need battery backup (Hybrid)? OK=Yes, Cancel=No (On-Grid).');
+
+  let sizeKw = fullCalcState.totalLoadKw > 0 ? fullCalcState.totalLoadKw : Math.ceil(avgUnits / 120);
+  const sizes = [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+  let finalSize = sizes[sizes.length - 1];
+  for (const s of sizes) { if (sizeKw <= s) { finalSize = s; break; } }
+  sizeKw = finalSize;
+
+  const panels     = Math.ceil((sizeKw * 1000) / 550);
+  const panelCost  = panels * 18500;
+  const invCost    = sizeKw * 22000;
+  let batCost = 0, batText = '';
+  if (isHybrid) {
+    const batKwh = Math.ceil(sizeKw * 0.75);
+    const numBat = Math.ceil(batKwh / 2.4);
+    batCost = numBat * 28000;
+    batText = `${numBat}x 200Ah Deep Cycle AGM`;
+  }
+  const total = panelCost + invCost + batCost + (sizeKw * 15000);
+
+  // Upload bill image
+  let billUrl = '';
+  const billFile = document.getElementById('full-calc-bill-upload');
+  if (billFile && billFile.files.length > 0) {
+    try {
+      showToast('Uploading bill...');
+      const ref = storage.ref(`quotes/bills/${Date.now()}_${billFile.files[0].name}`);
+      await ref.put(billFile.files[0]);
+      billUrl = await ref.getDownloadURL();
+    } catch (e) { console.error('Bill upload error:', e); }
+  }
+
+  // Save to Firebase
+  try {
+    let safeAppliances = {};
+    for (const k in fullCalcState.appliances) safeAppliances[k.replace(/\./g,'_')] = fullCalcState.appliances[k];
+    await db.ref('quotes').push({
+      customer: { name: fullName, phone, email, address, houseArea, uid: loggedInUser ? loggedInUser.uid : 'guest' },
+      billing:  { meterType, avgBill, avgUnits, billImageUrl: billUrl },
+      loadDetails: safeAppliances,
+      calculatedSystem: { sizeKw, type: isHybrid ? 'Hybrid' : 'On-Grid', estimatedCost: total },
+      date: new Date().toLocaleString(), status: 'New Request'
+    });
+  } catch (e) { console.error('Firebase quote error:', e); }
+
+  // WhatsApp message
+  let waMsg = `*✨ SOLAR QUOTE REQUEST*\n\n*Name:* ${fullName}\n*Phone:* ${phone}\n*Address:* ${address}\n*Bill:* Rs.${avgBill} | Units: ${avgUnits}\n*Meter:* ${meterType}\n\n*System:* ${sizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'}\n*Panels:* ${panels}x 550W\n*Inverter:* 1x ${sizeKw}kW\n${isHybrid ? `*Batteries:* ${batText}\n` : ''}*Est. Cost:* ${formatPrice(total)}`;
+
+  const resHtml = `
+    <div class="package-card">
+      <div>
+        <div class="section-tag">${sizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'} System</div>
+        <h3 class="pkg-title">Your Recommended Package</h3>
+        <p style="color:var(--gray-mid);font-size:0.9rem;">Est. Monthly Generation: ${sizeKw * 120} Units</p>
+        <ul class="pkg-items">
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>${panels}x 550W Tier-1 Solar Panels</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>1x ${sizeKw}kW ${isHybrid ? 'Hybrid' : 'On-Grid'} Inverter</li>
+          ${isHybrid ? `<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>${batText}</li>` : ''}
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Complete Installation & Wiring</li>
+        </ul>
+      </div>
+      <div class="pkg-price-box">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--gray-mid);">Estimated Cost</div>
+        <div class="pkg-total">${formatPrice(total)}</div>
+        <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}" target="_blank" class="wa-animated-btn" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:14px;text-decoration:none;">Send on WhatsApp</a>
+      </div>
+    </div>`;
+
+  const rc = document.getElementById('full-packages-container');
+  const rr = document.getElementById('full-calc-results');
+  if (rc) rc.innerHTML = resHtml;
+  if (rr) { rr.style.display = 'block'; rr.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+};
+
+// ============================================================
+// SEARCH & FILTER
+// ============================================================
 window.searchProducts = function(q) {
-  if (!q || q.length < 2) return renderAllProducts();
-  window.navigate('products');
-  const filtered = window.allProducts.filter(p => !p.isService && ((p.name && p.name.toLowerCase().includes(q.toLowerCase())) || (p.catLabel && p.catLabel.toLowerCase().includes(q.toLowerCase())) || (p.brand && p.brand.toLowerCase().includes(q.toLowerCase()))));
+  if (!q || q.length < 2) { renderAllProducts(); return; }
+  if (currentPage !== 'products') { window.navigate('products'); setTimeout(() => window.searchProducts(q), 150); return; }
+  const f = window.allProducts.filter(p => !p.isService && (
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    (p.catLabel || '').toLowerCase().includes(q.toLowerCase()) ||
+    (p.brand || '').toLowerCase().includes(q.toLowerCase())
+  ));
   const grid = document.getElementById('all-products-grid');
-  if (grid) {
-    grid.innerHTML = filtered.length ? filtered.map(renderProductCard).join('') : '<div class="empty-state"><h3>No products found</h3></div>';
-    document.getElementById('prod-count').textContent = filtered.length;
-  }
-}
+  if (grid) grid.innerHTML = f.length ? f.map(renderProductCard).join('') : '<div class="empty-state"><h3>No products found</h3></div>';
+  const cnt = document.getElementById('prod-count');
+  if (cnt) cnt.textContent = f.length;
+};
 
 window.filterProducts = function() {
-  const cats = Array.from(document.querySelectorAll('.filter-group input[data-filter="category"]:checked')).map(cb => cb.value);
-  const brands = Array.from(document.querySelectorAll('.filter-group input[data-filter="brand"]:checked')).map(cb => cb.value);
-  const sortBy = document.getElementById('sort-by').value;
-  const priceMax = parseInt(document.getElementById('price-range').value);
+  const cats    = Array.from(document.querySelectorAll('[data-filter="category"]:checked')).map(el => el.value);
+  const brands  = Array.from(document.querySelectorAll('[data-filter="brand"]:checked')).map(el => el.value);
+  const maxPr   = parseInt(document.getElementById('price-range').value);
+  const sortBy  = document.getElementById('sort-by').value;
 
-  let filtered = window.allProducts.filter(p => !p.isService && cats.includes(p.cat) && brands.includes(p.brand) && p.price <= priceMax);
-
-  if(sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-  else if(sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-  else if(sortBy === 'newest') filtered.sort((a, b) => b.id - a.id);
-  else if(sortBy === 'popular') filtered.sort((a, b) => (b.badge==='Best Seller'?1:0) - (a.badge==='Best Seller'?1:0));
+  let filtered = window.allProducts.filter(p => !p.isService && cats.includes(p.cat) && brands.includes(p.brand) && p.price <= maxPr);
+  if (sortBy === 'price-asc')  filtered.sort((a,b) => a.price - b.price);
+  if (sortBy === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+  if (sortBy === 'newest')     filtered.sort((a,b) => b.id - a.id);
+  if (sortBy === 'popular')    filtered.sort((a,b) => (b.badge==='Best Seller'?1:0)-(a.badge==='Best Seller'?1:0));
 
   const grid = document.getElementById('all-products-grid');
-  if (grid) {
-    grid.innerHTML = filtered.length ? filtered.map(renderProductCard).join('') : '<div class="empty-state"><h3>No products match</h3></div>';
-    document.getElementById('prod-count').textContent = filtered.length;
-  }
-}
-
-window.sendMessage = function() { showToast('✓ Message Sent!'); }
+  if (grid) grid.innerHTML = filtered.length ? filtered.map(renderProductCard).join('') : '<div class="empty-state"><h3>No products match</h3></div>';
+  const cnt = document.getElementById('prod-count');
+  if (cnt) cnt.textContent = filtered.length;
+};
 
 // ============================================================
-// REAL-TIME FIREBASE SYNC & FAST LOAD FIX
+// CONTACT / MESSAGE
 // ============================================================
-document.addEventListener("DOMContentLoaded", function() {
-  
-  history.replaceState({ trap: true }, "", window.location.pathname);
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialPage = urlParams.get('page') || 'home';
-  const initialParam = urlParams.get('param');
+window.sendMessage = function() { showToast('✓ Message sent! We will contact you soon.'); };
 
-  history.pushState({ page: initialPage, param: initialParam }, "", `?page=${initialPage}${initialParam ? `&param=${initialParam}` : ''}`);
+// ============================================================
+// AUTH MODAL
+// ============================================================
+window.openAuthModal = function(mode) {
+  isLoginMode = mode === 'login';
+  const title  = document.getElementById('auth-modal-title');
+  const btn    = document.getElementById('auth-submit-button');
+  const sw     = document.getElementById('auth-switch-text');
+  const overlay= document.getElementById('auth-modal-overlay');
+  if (title)   title.textContent = isLoginMode ? 'Login to Your Account' : 'Create New Account';
+  if (btn)     btn.textContent   = isLoginMode ? 'Login' : 'Register';
+  if (sw)      sw.innerHTML      = isLoginMode
+    ? `Don't have an account? <a href="#" onclick="window.switchAuthMode()">Register here</a>`
+    : `Already have an account? <a href="#" onclick="window.switchAuthMode()">Login here</a>`;
+  if (overlay) overlay.classList.add('active');
+};
 
-  applyRoute(initialPage, initialParam);
-  updateFullCalcDisplay(); 
-  calculateTotalLoad();
+window.closeAuthModal = function() {
+  const overlay = document.getElementById('auth-modal-overlay');
+  const errEl   = document.getElementById('auth-error');
+  if (overlay) overlay.classList.remove('active');
+  if (errEl)   errEl.style.display = 'none';
+};
 
-  setTimeout(() => {
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(() => {
-      document.getElementById('splash').style.display = 'none';
-      document.getElementById('app').classList.add('show');
-      updateCartCount(); 
-    }, 400); 
-  }, 500); 
+window.switchAuthMode = function() { window.openAuthModal(isLoginMode ? 'register' : 'login'); };
 
-  db.ref('products').on('value', (snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      window.allProducts = Object.values(data); 
-      
-      if(currentPage === 'home') { renderCategoryShowcase(); renderFeaturedProducts(); }
-      if(currentPage === 'products') renderAllProducts();
-      if(currentPage === 'cat') renderCategoryPage(currentCat);
-      if(currentPage === 'product') renderProductDetail(currentProductId);
+const authForm = document.getElementById('auth-form');
+if (authForm) {
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value;
+    const pass  = document.getElementById('auth-password').value;
+    const errEl = document.getElementById('auth-error');
+    try {
+      if (isLoginMode) {
+        await auth.signInWithEmailAndPassword(email, pass);
+      } else {
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await db.ref('users/' + cred.user.uid).set({ email, createdAt: new Date().toISOString() });
+      }
+      window.closeAuthModal();
+      showToast(isLoginMode ? 'Logged in!' : 'Account created!');
+    } catch (err) {
+      if (errEl) { errEl.textContent = err.message; errEl.style.display = 'block'; }
     }
   });
+}
 
+window.signInWithGoogle = async function() {
+  try {
+    await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    window.closeAuthModal();
+    showToast('Signed in with Google!');
+  } catch (e) { showToast(e.message, true); }
+};
+
+window.logoutUser   = () => auth.signOut().then(() => showToast('Logged out.'));
+window.toggleUserMenu = () => { const m = document.getElementById('user-menu'); if (m) m.classList.toggle('active'); };
+
+auth.onAuthStateChanged(async (user) => {
+  loggedInUser = user;
+  const authSec    = document.getElementById('auth-section');
+  const userSec    = document.getElementById('user-dropdown-section');
+  const myOrdNav   = document.getElementById('nav-my-orders-item');
+  const mobLogin   = document.getElementById('mobile-nav-login');
+  const mobLogout  = document.getElementById('mobile-nav-logout');
+  const mobOrders  = document.getElementById('mobile-nav-my-orders');
+
+  if (user) {
+    if (authSec)   authSec.style.display  = 'none';
+    if (userSec)   userSec.style.display  = 'block';
+    if (myOrdNav)  myOrdNav.style.display = 'block';
+    if (mobLogin)  mobLogin.style.display  = 'none';
+    if (mobLogout) mobLogout.style.display = 'block';
+    if (mobOrders) mobOrders.style.display = 'block';
+
+    const nameEl    = document.getElementById('user-display-name');
+    const avatarEl  = document.getElementById('user-avatar-initial');
+    const label     = user.displayName || user.email;
+    if (nameEl)  nameEl.textContent  = label.split('@')[0];
+    if (avatarEl) avatarEl.textContent = label[0].toUpperCase();
+
+    const snap = await db.ref('users/' + user.uid).once('value');
+    userProfile = snap.val();
+  } else {
+    if (authSec)   authSec.style.display  = 'block';
+    if (userSec)   userSec.style.display  = 'none';
+    if (myOrdNav)  myOrdNav.style.display = 'none';
+    if (mobLogin)  mobLogin.style.display  = 'block';
+    if (mobLogout) mobLogout.style.display = 'none';
+    if (mobOrders) mobOrders.style.display = 'none';
+    userProfile = null;
+  }
 });
+
+// ============================================================
+// MOBILE MENU
+// ============================================================
+window.toggleMobile    = () => { const m = document.getElementById('mobile-menu'); if (m) m.classList.toggle('open'); };
+window.closeMobileOnBg = (e) => { if (e.target && e.target.id === 'mobile-menu') window.toggleMobile(); };
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+window.onload = function() {
+  // Load cart from localStorage
+  try {
+    const saved = localStorage.getItem('zmsolar_cart');
+    if (saved) { cart = JSON.parse(saved); updateCartCount(); }
+  } catch (e) {}
+
+  // Read URL params
+  const params = new URLSearchParams(window.location.search);
+  const initPage  = params.get('page')  || 'home';
+  const initParam = params.get('param') || null;
+
+  // Push initial history state
+  history.replaceState({ page: initPage, param: initParam }, '', window.location.href);
+
+  // Firebase: sync products from DB, then render
+  db.ref('products').once('value', (snap) => {
+    if (snap.exists()) {
+      const data = snap.val();
+      const fromDB = Object.values(data);
+      if (fromDB.length > 0) window.allProducts = fromDB;
+    } else {
+      // First run: seed DB with default products
+      window.allProducts.forEach(p => db.ref('products/' + p.id).set(p));
+    }
+    // Render initial page
+    applyRoute(initPage, initParam);
+  });
+
+  // Splash screen — hide after 1.8s WITHOUT blocking page load
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    const app    = document.getElementById('app');
+    if (splash) splash.classList.add('hide');
+    setTimeout(() => {
+      if (splash) splash.style.display = 'none';
+      if (app)    app.classList.add('show');
+    }, 400);
+  }, 1800);
+};
 </script>
 </body>
 </html>
